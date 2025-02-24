@@ -12,7 +12,7 @@ export interface IStore {
   category: StoreCategory;
   thumbnail: string;
   description?: string;
-  isFavorite?: boolean;
+  isFavorite: boolean;
 }
 
 export interface IStoreListResponse {
