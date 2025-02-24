@@ -196,7 +196,8 @@ const storeNames: Record<string, string> = {
 export async function GET(request: NextRequest) {
   try {
     const url = new URL(request.url);
-    const storeId = url.pathname.split("/").pop(); // URL에서 storeId 추출
+    const segments = url.pathname.split("/");
+    const storeId = segments[segments.length - 2];
     const discounts = discountData[storeId] || [];
     const storeName = storeNames[storeId] || storeId.toUpperCase();
 

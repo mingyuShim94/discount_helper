@@ -1,10 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { IStoreDiscount } from "@/types/discount";
+import { IDiscountInfo } from "@/types/discount";
+
+interface StoreDiscounts {
+  storeName: string;
+  discounts: IDiscountInfo[];
+}
 
 export function useStoreDiscounts(storeId: string) {
-  const [discounts, setDiscounts] = useState<IStoreDiscount | null>(null);
+  const [storeData, setStoreData] = useState<StoreDiscounts | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -16,7 +21,7 @@ export function useStoreDiscounts(storeId: string) {
         if (!response.ok)
           throw new Error("할인 정보를 불러오는데 실패했습니다.");
         const data = await response.json();
-        setDiscounts(data);
+        setStoreData({ storeName: data.storeName, discounts: data.discounts });
       } catch (err) {
         setError(
           err instanceof Error
@@ -31,5 +36,5 @@ export function useStoreDiscounts(storeId: string) {
     if (storeId) fetchDiscounts();
   }, [storeId]);
 
-  return { discounts, isLoading, error };
+  return { storeData, isLoading, error };
 }

@@ -10,24 +10,26 @@ interface FilteredDiscountsProps {
   discounts: IDiscountInfo[];
 }
 
-export function FilteredDiscounts({ discounts }: FilteredDiscountsProps) {
-  const [filteredDiscounts, setFilteredDiscounts] = useState(discounts);
+// 필터 초기값 설정
+const initialFilter: IDiscountFilter = {
+  carrier: "skt", // SKT 멤버십으로 초기값 설정
+  useNaverPay: true, // 네이버페이 사용 체크
+  useNaverMembership: true, // 네이버 멤버십 사용 체크
+};
 
-  const handleFilterChange = (filter: IDiscountFilter) => {
-    const filtered = filterDiscounts(discounts, filter);
-    setFilteredDiscounts(filtered);
-  };
+export function FilteredDiscounts({ discounts }: FilteredDiscountsProps) {
+  const [filter, setFilter] = useState<IDiscountFilter>(initialFilter);
+
+  const filteredDiscounts = filterDiscounts(discounts, filter);
 
   return (
-    <>
-      <DiscountFilter onFilterChange={handleFilterChange} />
-      {filteredDiscounts.length > 0 ? (
-        <DiscountList discounts={filteredDiscounts} />
-      ) : (
-        <p className="text-center text-muted-foreground">
-          선택하신 조건에 해당하는 할인 정보가 없습니다.
-        </p>
-      )}
-    </>
+    <div>
+      <DiscountFilter
+        filter={filter}
+        onFilterChange={setFilter}
+        discounts={discounts}
+      />
+      <DiscountList discounts={filteredDiscounts} />
+    </div>
   );
 }

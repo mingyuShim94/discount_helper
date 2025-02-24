@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { IDiscountInfo } from "@/types/discount";
 
 export interface IDiscountFilter {
   carrier: string;
@@ -18,15 +19,17 @@ export interface IDiscountFilter {
 interface DiscountFilterProps {
   filter: IDiscountFilter;
   onFilterChange: (filter: IDiscountFilter) => void;
+  discounts: IDiscountInfo[];
 }
 
 export function DiscountFilter({
   filter,
   onFilterChange,
+  discounts,
 }: DiscountFilterProps) {
-  useEffect(() => {
-    onFilterChange(filter);
-  }, [filter, onFilterChange]);
+  if (!discounts || discounts.length === 0) {
+    return <div>No discounts available</div>;
+  }
 
   const handleChange = (changes: Partial<IDiscountFilter>) => {
     const newFilter = { ...filter, ...changes };
