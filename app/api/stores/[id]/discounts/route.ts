@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { DiscountType, IDiscountInfo } from "@/types/discount";
 import { optimizeDiscounts } from "@/lib/discount/optimizeDiscounts";
 
@@ -194,11 +194,11 @@ const storeNames: Record<string, string> = {
 };
 
 export async function GET(
-  request: Request,
-  context: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: { id: string } }
 ) {
   try {
-    const storeId = context.params.id;
+    const storeId = params.id;
     const discounts = discountData[storeId] || [];
     const storeName = storeNames[storeId] || storeId.toUpperCase();
 
