@@ -4,18 +4,25 @@ import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { Card } from "@/components/ui/card";
 
 async function getStoreDiscounts(id: string) {
-  // 환경변수를 사용하여 baseUrl 설정
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
 
-  const res = await fetch(`${baseUrl}/api/stores/${id}/discounts`, {
-    cache: "no-store",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+  try {
+    const res = await fetch(`${baseUrl}/api/stores/${id}/discounts`, {
+      cache: "no-store",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-  if (!res.ok) throw new Error("할인 정보를 불러오는데 실패했습니다.");
-  return res.json();
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+
+    return res.json();
+  } catch (error) {
+    console.error("Failed to fetch store discounts:", error);
+    throw new Error("할인 정보를 불러오는데 실패했습니다.");
+  }
 }
 
 export default async function StorePage({
