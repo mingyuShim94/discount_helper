@@ -1,9 +1,9 @@
 export enum StoreCategory {
   CONVENIENCE = "편의점",
   CAFE = "카페",
-  RESTAURANT = "음식점",
-  MOVIE = "영화관",
-  SHOPPING = "쇼핑몰",
+  // RESTAURANT = "음식점",
+  // MOVIE = "영화관",
+  // SHOPPING = "쇼핑몰",
 }
 
 export interface IStore {

@@ -48,7 +48,7 @@ export function DiscountFilter({ onFilterChange }: IDiscountFilterProps) {
             <SelectValue placeholder="통신사멥버십을 선택하세요" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="none">알뜰폰/없음</SelectItem>
+            <SelectItem value="none">없음</SelectItem>
             <SelectItem value="skt">SKT멤버십</SelectItem>
             <SelectItem value="kt">KT멤버십</SelectItem>
             <SelectItem value="lg">LGU+멤버십</SelectItem>
