@@ -1,11 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(
-  _request: Request,
-  { params: { id } }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest) {
   try {
-    console.log(`Toggling favorite for store ${id}`);
+    const url = new URL(request.url);
+    const storeId = url.pathname.split("/").pop(); // URL에서 storeId 추출
+    console.log(`Toggling favorite for store ${storeId}`);
     // 실제 DB 연동 전까지는 성공 응답만 반환
     return NextResponse.json({ success: true });
   } catch (error) {
