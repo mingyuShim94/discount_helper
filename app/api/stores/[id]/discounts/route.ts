@@ -194,15 +194,14 @@ const storeNames: Record<string, string> = {
 };
 
 export async function GET(
-  _request: Request,
-  { params }: { params: { id: string } }
+  request: Request,
+  context: { params: { id: string } }
 ) {
   try {
-    const storeId = params.id;
+    const storeId = context.params.id;
     const discounts = discountData[storeId] || [];
     const storeName = storeNames[storeId] || storeId.toUpperCase();
 
-    // 현재 시간 기준으로 최적의 할인 조합 계산
     const optimizedDiscount = optimizeDiscounts(discounts);
 
     return NextResponse.json({

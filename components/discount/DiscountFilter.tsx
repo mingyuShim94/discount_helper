@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Select,
   SelectContent,
@@ -15,24 +15,21 @@ export interface IDiscountFilter {
   useNaverMembership: boolean;
 }
 
-interface IDiscountFilterProps {
+interface DiscountFilterProps {
+  filter: IDiscountFilter;
   onFilterChange: (filter: IDiscountFilter) => void;
 }
 
-export function DiscountFilter({ onFilterChange }: IDiscountFilterProps) {
-  const [filter, setFilter] = useState<IDiscountFilter>({
-    carrier: "skt",
-    useNaverPay: true,
-    useNaverMembership: true,
-  });
-
+export function DiscountFilter({
+  filter,
+  onFilterChange,
+}: DiscountFilterProps) {
   useEffect(() => {
     onFilterChange(filter);
-  }, []);
+  }, [filter, onFilterChange]);
 
   const handleChange = (changes: Partial<IDiscountFilter>) => {
     const newFilter = { ...filter, ...changes };
-    setFilter(newFilter);
     onFilterChange(newFilter);
   };
 

@@ -4,8 +4,8 @@ import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { Card } from "@/components/ui/card";
 
 async function getStoreDiscounts(id: string) {
-  // 서버 사이드에서는 전체 URL이 필요합니다
-  const baseUrl = "http://localhost:3000";
+  // 환경변수를 사용하여 baseUrl 설정
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
 
   const res = await fetch(`${baseUrl}/api/stores/${id}/discounts`, {
     cache: "no-store",
