@@ -1,3 +1,5 @@
+export const runtime = "edge";
+
 import { NextRequest, NextResponse } from "next/server";
 import { DiscountType, IDiscountInfo } from "@/types/discount";
 import { optimizeDiscounts } from "@/lib/discount/optimizeDiscounts";
