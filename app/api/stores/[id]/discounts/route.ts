@@ -193,14 +193,10 @@ const storeNames: Record<string, string> = {
   "7": "스타벅스",
 };
 
-type RouteSegment = {
-  params: { id: string };
-  searchParams: { [key: string]: string | string[] | undefined };
-};
-
-export async function GET(request: NextRequest, segment: RouteSegment) {
+export async function GET(request: NextRequest) {
   try {
-    const storeId = segment.params.id;
+    const url = new URL(request.url);
+    const storeId = url.pathname.split("/").pop(); // URL에서 storeId 추출
     const discounts = discountData[storeId] || [];
     const storeName = storeNames[storeId] || storeId.toUpperCase();
 
