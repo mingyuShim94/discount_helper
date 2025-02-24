@@ -1,23 +1,53 @@
 "use client";
 
 import { StoreGrid } from "@/components/store/StoreGrid";
-import { useStores } from "@/hooks/useStores";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { StoreCategory } from "@/types/store";
+import { Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
+import { debounce } from "lodash";
 
-export default function Home() {
-  const { stores, isLoading, error, toggleFavorite } = useStores();
+export default function HomePage() {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearch = debounce((value: string) => {
+    setSearchQuery(value);
+  }, 300);
 
   return (
-    <main className="container mx-auto px-4">
-      <h1 className="text-3xl font-bold text-center my-8">할인도우미</h1>
-      <p className="text-center text-muted-foreground mb-8">
-        매장별 최적의 할인 혜택을 확인하세요
-      </p>
-      <StoreGrid
-        stores={stores}
-        isLoading={isLoading}
-        error={error}
-        onFavoriteToggle={toggleFavorite}
-      />
+    <main className="container mx-auto px-4 py-8">
+      <div className="mb-8">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+          <Input
+            className="pl-10"
+            placeholder="매장 검색..."
+            onChange={(e) => handleSearch(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <Tabs defaultValue="all">
+        <TabsList>
+          <TabsTrigger value="all">전체</TabsTrigger>
+          {Object.values(StoreCategory).map((category) => (
+            <TabsTrigger key={category} value={category}>
+              {category}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+
+        <TabsContent value="all">
+          <StoreGrid query={searchQuery} />
+        </TabsContent>
+
+        {Object.values(StoreCategory).map((category) => (
+          <TabsContent key={category} value={category}>
+            <StoreGrid category={category} query={searchQuery} />
+          </TabsContent>
+        ))}
+      </Tabs>
     </main>
   );
 }
