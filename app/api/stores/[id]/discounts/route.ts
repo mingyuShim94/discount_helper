@@ -193,19 +193,14 @@ const storeNames: Record<string, string> = {
   "7": "스타벅스",
 };
 
-// Next.js 15의 새로운 타입 정의 사용
-interface RouteContext {
-  params: {
-    id: string;
-  };
-}
+type RouteSegment = {
+  params: { id: string };
+  searchParams: { [key: string]: string | string[] | undefined };
+};
 
-export async function GET(
-  req: NextRequest,
-  context: RouteContext // 타입을 RouteContext로 변경
-) {
+export async function GET(request: NextRequest, segment: RouteSegment) {
   try {
-    const storeId = context.params.id;
+    const storeId = segment.params.id;
     const discounts = discountData[storeId] || [];
     const storeName = storeNames[storeId] || storeId.toUpperCase();
 
