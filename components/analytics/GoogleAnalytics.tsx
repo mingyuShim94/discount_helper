@@ -1,7 +1,7 @@
 "use client";
 
 import Script from "next/script";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
 // gtag 함수에 대한 타입 선언
@@ -19,8 +19,16 @@ declare global {
 export function GoogleAnalytics() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [mounted, setMounted] = useState(false);
+
+  // 클라이언트 사이드에서만 실행되도록 함
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
+    if (!mounted) return;
+
     if (pathname && typeof window.gtag === "function") {
       window.gtag(
         "config",
@@ -30,7 +38,10 @@ export function GoogleAnalytics() {
         }
       );
     }
-  }, [pathname, searchParams]);
+  }, [pathname, searchParams, mounted]);
+
+  // 서버 사이드 렌더링 중에는 아무것도 렌더링하지 않음
+  if (!mounted) return null;
 
   return (
     <>
