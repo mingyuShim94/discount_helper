@@ -4,15 +4,31 @@ import Script from "next/script";
 import { useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
+// gtag 함수에 대한 타입 선언
+declare global {
+  interface Window {
+    gtag: (
+      command: string,
+      targetId: string,
+      params?: Record<string, any>
+    ) => void;
+    dataLayer: any[];
+  }
+}
+
 export function GoogleAnalytics() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    if (pathname && window.gtag) {
-      window.gtag("config", process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID, {
-        page_path: pathname + searchParams.toString(),
-      });
+    if (pathname && typeof window.gtag === "function") {
+      window.gtag(
+        "config",
+        process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID as string,
+        {
+          page_path: pathname + searchParams.toString(),
+        }
+      );
     }
   }, [pathname, searchParams]);
 
