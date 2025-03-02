@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { mockTips } from "@/lib/api/tips";
 
-interface IParams {
-  params: {
-    slug: string;
-  };
-}
-
-export async function GET(request: NextRequest, { params }: IParams) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { slug: string } }
+) {
   try {
     const tip = mockTips.find((tip) => tip.slug === params.slug);
 
