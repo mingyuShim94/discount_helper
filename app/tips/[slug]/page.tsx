@@ -12,7 +12,9 @@ interface TipPageProps {
 export async function generateMetadata({
   params,
 }: TipPageProps): Promise<Metadata> {
-  const tip = await getTipBySlug(params.slug);
+  // params 객체를 await로 처리
+  const resolvedParams = await params;
+  const tip = await getTipBySlug(resolvedParams.slug);
 
   if (!tip) {
     return {
@@ -27,7 +29,9 @@ export async function generateMetadata({
 }
 
 export default async function TipPage({ params }: TipPageProps) {
-  const tip = await getTipBySlug(params.slug);
+  // params 객체를 await로 처리
+  const resolvedParams = await params;
+  const tip = await getTipBySlug(resolvedParams.slug);
 
   if (!tip) {
     notFound();
