@@ -4,17 +4,15 @@ import { Calendar, User } from "lucide-react";
 import { getTipBySlug } from "@/lib/api/tips";
 
 interface TipPageProps {
-  params: {
-    slug: string;
-  };
+  params: Promise<{ slug: string }>;
 }
 
 export async function generateMetadata({
   params,
 }: TipPageProps): Promise<Metadata> {
   // params 객체를 await로 처리
-  const resolvedParams = await params;
-  const tip = await getTipBySlug(resolvedParams.slug);
+  const { slug } = await params;
+  const tip = await getTipBySlug(slug);
 
   if (!tip) {
     return {
@@ -30,8 +28,8 @@ export async function generateMetadata({
 
 export default async function TipPage({ params }: TipPageProps) {
   // params 객체를 await로 처리
-  const resolvedParams = await params;
-  const tip = await getTipBySlug(resolvedParams.slug);
+  const { slug } = await params;
+  const tip = await getTipBySlug(slug);
 
   if (!tip) {
     notFound();
