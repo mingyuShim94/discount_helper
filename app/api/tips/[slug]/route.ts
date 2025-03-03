@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { mockTips } from "@/lib/api/tips";
 
-export async function GET(
+export function GET(
   request: Request,
-  { params }: { params: { slug: string } }
+  props: { params: Record<string, string> }
 ) {
   try {
-    const slug = params.slug;
+    const slug = props.params.slug;
     const tip = mockTips.find((tip) => tip.slug === slug);
 
     if (!tip) {
