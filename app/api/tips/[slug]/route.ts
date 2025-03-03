@@ -3,10 +3,11 @@ import { mockTips } from "@/lib/api/tips";
 
 export async function GET(
   request: NextRequest,
-  context: { params: { slug: string } }
+  params: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const slug = context.params.slug;
+    const paramsData = await params.params;
+    const slug = paramsData.slug;
     const tip = mockTips.find((tip) => tip.slug === slug);
 
     if (!tip) {
