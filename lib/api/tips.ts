@@ -18,7 +18,6 @@ export const mockTips: ITip[] = [
           <h3 class="font-bold text-lg text-yellow-800">할인 요약</h3>
         </div>
         <p class="mt-2">5000원 결제 시 1000원 할인 (20% 할인 효과)</p>
-        <p class="text-sm text-gray-600 mt-1">유효기간: 2023년 12월 31일까지</p>
       </div>
       
       <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
@@ -133,7 +132,7 @@ export const mockTips: ITip[] = [
         <p class="text-base">5000원 결제 시 1000원 할인은 20% 할인 효과가 있습니다. 정확히 5000원어치 상품을 구매하면 할인 효과를 극대화할 수 있어요!</p>
       </div>
     `,
-    publishedAt: new Date(2023, 11, 15, 9, 0, 0).toISOString(),
+    publishedAt: new Date(2025, 2, 3, 9, 0, 0).toISOString(),
     author: "할인도우미",
     tags: ["이마트24", "할인", "네이버페이", "쿠폰", "편의점"],
   },
