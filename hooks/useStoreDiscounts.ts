@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { IDiscountInfo } from "@/types/discount";
+import { STORE_DISCOUNTS } from "@/lib/data/discounts";
 
 interface StoreDiscounts {
   storeName: string;
@@ -14,14 +15,21 @@ export function useStoreDiscounts(storeId: string) {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    const fetchDiscounts = async () => {
+    const fetchDiscounts = () => {
       try {
         setIsLoading(true);
-        const response = await fetch(`/api/stores/${storeId}/discounts`);
-        if (!response.ok)
-          throw new Error("할인 정보를 불러오는데 실패했습니다.");
-        const data = await response.json();
-        setStoreData({ storeName: data.storeName, discounts: data.discounts });
+
+        // 정적 데이터에서 매장 할인 정보 가져오기
+        const discountData = STORE_DISCOUNTS[storeId];
+
+        if (!discountData) {
+          throw new Error("할인 정보를 찾을 수 없습니다.");
+        }
+
+        setStoreData({
+          storeName: discountData.storeName,
+          discounts: discountData.discounts,
+        });
       } catch (err) {
         setError(
           err instanceof Error

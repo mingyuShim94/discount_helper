@@ -1,19 +1,15 @@
 export interface IDiscountInfo {
   id: string;
   type: DiscountType;
-  provider: string;
+  title: string;
   description: string;
-  conditions: string[];
-  discountRate?: number;
-  discountAmount?: number;
-  minPurchaseAmount?: number;
-  maxDiscountAmount?: number;
-  validDays?: string[];
-  validTime?: string;
-  membershipTier?: string[];
-  registrationRequired?: boolean;
+  conditions: string;
+  validUntil?: string;
   registrationLink?: string;
-  targetItems?: string[];
+  tipLinks?: {
+    title: string;
+    url: string;
+  }[];
 }
 
 export enum DiscountType {
@@ -21,6 +17,10 @@ export enum DiscountType {
   MEMBERSHIP = "멤버십",
   NAVERMEMBERSHIP = "네이버 멤버십",
   SPECIAL = "특별할인",
+  POINT = "포인트",
+  CARD = "카드",
+  COUPON = "쿠폰",
+  PAYMENT = "결제수단",
 }
 
 export interface IStoreDiscount {

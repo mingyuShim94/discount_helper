@@ -1,10 +1,6 @@
-export const runtime = "edge";
+import { IStore, StoreCategory } from "@/types/store";
 
-import { NextResponse } from "next/server";
-import { StoreCategory } from "@/types/store";
-
-// 임시 데이터
-const mockStores = [
+export const STORES: IStore[] = [
   {
     id: "1",
     name: "GS25",
@@ -55,36 +51,3 @@ const mockStores = [
     isFavorite: false,
   },
 ];
-
-export async function GET(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const category = searchParams.get("category");
-    const query = searchParams.get("query");
-
-    let filteredStores = [...mockStores];
-
-    if (category) {
-      filteredStores = filteredStores.filter(
-        (store) => store.category === category
-      );
-    }
-
-    if (query) {
-      filteredStores = filteredStores.filter((store) =>
-        store.name.toLowerCase().includes(query.toLowerCase())
-      );
-    }
-
-    return NextResponse.json({
-      stores: filteredStores,
-      totalCount: filteredStores.length,
-    });
-  } catch (error) {
-    console.error("Store list error:", error);
-    return NextResponse.json(
-      { error: "매장 목록을 불러오는데 실패했습니다." },
-      { status: 500 }
-    );
-  }
-}

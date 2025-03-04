@@ -1,5 +1,8 @@
 import { IDiscountInfo } from "@/types/discount";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ExternalLink, HelpCircle } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 interface IDiscountCardProps {
   discount: IDiscountInfo;
@@ -14,7 +17,7 @@ export function DiscountCard({ discount }: IDiscountCardProps) {
 
   return (
     <div
-      onClick={handleCardClick}
+      onClick={discount.registrationLink ? handleCardClick : undefined}
       className={`${
         discount.registrationLink
           ? "cursor-pointer hover:opacity-80 transition-opacity"
@@ -24,37 +27,52 @@ export function DiscountCard({ discount }: IDiscountCardProps) {
       <Card>
         <CardHeader>
           <CardTitle className="flex justify-between items-center">
-            <span>{discount.provider}</span>
-            {discount.registrationRequired && (
-              <a
-                href={discount.registrationLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-primary hover:underline"
-                onClick={(e) => e.stopPropagation()}
-              >
+            <span>{discount.title}</span>
+            {discount.registrationLink && (
+              <span className="text-sm text-primary flex items-center gap-1">
+                <ExternalLink size={16} />
                 신청하기
-              </a>
+              </span>
             )}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
             <p className="font-medium">{discount.description}</p>
-            {discount.conditions.map((condition, index) => (
-              <p key={index} className="text-sm text-muted-foreground">
-                • {condition}
-              </p>
-            ))}
-            {discount.validTime && (
+            <p className="text-sm text-muted-foreground">
+              • {discount.conditions}
+            </p>
+            {discount.validUntil && (
               <p className="text-sm text-muted-foreground">
-                • 이용시간: {discount.validTime}
+                • 유효기간: {discount.validUntil}
               </p>
             )}
-            {discount.minPurchaseAmount && (
-              <p className="text-sm text-muted-foreground">
-                • 최소결제금액: {discount.minPurchaseAmount.toLocaleString()}원
-              </p>
+
+            {discount.tipLinks && discount.tipLinks.length > 0 && (
+              <div className="mt-4 space-y-2">
+                <p className="text-sm font-medium flex items-center gap-1">
+                  <HelpCircle size={16} />
+                  쿠폰 찾는 방법
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {discount.tipLinks.map((tip, index) => (
+                    <Link
+                      key={index}
+                      href={tip.url}
+                      onClick={(e) => e.stopPropagation()}
+                      className="cursor-pointer"
+                    >
+                      <Button
+                        variant="default"
+                        size="sm"
+                        className="bg-white text-primary border border-primary hover:bg-primary hover:text-white transition-colors cursor-pointer"
+                      >
+                        {tip.title}
+                      </Button>
+                    </Link>
+                  ))}
+                </div>
+              </div>
             )}
           </div>
         </CardContent>

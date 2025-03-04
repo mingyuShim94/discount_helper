@@ -1,18 +1,16 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Calendar, User } from "lucide-react";
-import { getTipBySlug } from "@/lib/api/tips";
+import { TIPS } from "@/lib/data/tips";
 
 interface TipPageProps {
-  params: Promise<{ slug: string }>;
+  params: { slug: string };
 }
 
 export async function generateMetadata({
   params,
 }: TipPageProps): Promise<Metadata> {
-  // params 객체를 await로 처리
-  const { slug } = await params;
-  const tip = await getTipBySlug(slug);
+  const tip = TIPS.find((tip) => tip.slug === params.slug);
 
   if (!tip) {
     return {
@@ -26,10 +24,8 @@ export async function generateMetadata({
   };
 }
 
-export default async function TipPage({ params }: TipPageProps) {
-  // params 객체를 await로 처리
-  const { slug } = await params;
-  const tip = await getTipBySlug(slug);
+export default function TipPage({ params }: TipPageProps) {
+  const tip = TIPS.find((tip) => tip.slug === params.slug);
 
   if (!tip) {
     notFound();

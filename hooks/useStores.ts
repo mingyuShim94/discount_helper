@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { IStore, StoreCategory } from "@/types/store";
+import { STORES } from "@/lib/data/stores";
 
 interface UseStoresProps {
   category?: StoreCategory;
@@ -12,19 +13,29 @@ export function useStores({ category, query }: UseStoresProps = {}) {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    const fetchStores = async () => {
+    const fetchStores = () => {
       try {
         setIsLoading(true);
-        const params = new URLSearchParams();
-        if (category) params.append("category", category);
-        if (query) params.append("query", query);
 
-        const response = await fetch(`/api/stores?${params}`);
-        if (!response.ok)
-          throw new Error("매장 정보를 불러오는데 실패했습니다.");
+        // 정적 데이터에서 필터링
+        let filteredStores = [...STORES];
 
-        const data = await response.json();
-        setStores(data.stores);
+        // 카테고리 필터링
+        if (category) {
+          filteredStores = filteredStores.filter(
+            (store) => store.category === category
+          );
+        }
+
+        // 검색어 필터링
+        if (query) {
+          const lowerQuery = query.toLowerCase();
+          filteredStores = filteredStores.filter((store) =>
+            store.name.toLowerCase().includes(lowerQuery)
+          );
+        }
+
+        setStores(filteredStores);
       } catch (err) {
         setError(
           err instanceof Error
@@ -39,26 +50,14 @@ export function useStores({ category, query }: UseStoresProps = {}) {
     fetchStores();
   }, [category, query]);
 
-  const toggleFavorite = async (storeId: string) => {
-    try {
-      const response = await fetch(`/api/stores/${storeId}/favorite`, {
-        method: "POST",
-      });
-
-      if (!response.ok) {
-        throw new Error("즐겨찾기 설정에 실패했습니다.");
-      }
-
-      setStores((prev) =>
-        prev.map((store) =>
-          store.id === storeId
-            ? { ...store, isFavorite: !store.isFavorite }
-            : store
-        )
-      );
-    } catch (error) {
-      console.error("즐겨찾기 오류:", error);
-    }
+  const toggleFavorite = (storeId: string) => {
+    setStores((prev) =>
+      prev.map((store) =>
+        store.id === storeId
+          ? { ...store, isFavorite: !store.isFavorite }
+          : store
+      )
+    );
   };
 
   return { stores, isLoading, error, toggleFavorite };
