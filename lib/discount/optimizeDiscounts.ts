@@ -66,14 +66,14 @@ export function optimizeDiscounts(
     combinations.push(bestMembership);
     totalDiscountRate += getEffectiveDiscountRate(bestMembership);
     descriptionParts.push(
-      `${bestMembership.provider} ${bestMembership.description}`
+      `${bestMembership.title} ${bestMembership.description}`
     );
   }
 
   if (bestPayment) {
     combinations.push(bestPayment);
     totalDiscountRate += getEffectiveDiscountRate(bestPayment);
-    descriptionParts.push(`${bestPayment.provider} ${bestPayment.description}`);
+    descriptionParts.push(`${bestPayment.title} ${bestPayment.description}`);
   }
 
   return {

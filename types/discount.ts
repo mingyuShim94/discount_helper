@@ -10,6 +10,9 @@ export interface IDiscountInfo {
     title: string;
     url: string;
   }[];
+  validTime?: string;
+  validDays?: string[];
+  discountRate?: number;
 }
 
 export enum DiscountType {
