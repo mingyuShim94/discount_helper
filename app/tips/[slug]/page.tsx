@@ -1,3 +1,4 @@
+export const runtime = "edge";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Calendar, User } from "lucide-react";
