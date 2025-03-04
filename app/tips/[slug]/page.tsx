@@ -2,15 +2,17 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Calendar, User } from "lucide-react";
 import { TIPS } from "@/lib/data/tips";
+import { use } from "react";
 
 interface TipPageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export async function generateMetadata({
   params,
 }: TipPageProps): Promise<Metadata> {
-  const tip = TIPS.find((tip) => tip.slug === params.slug);
+  const { slug } = await params;
+  const tip = TIPS.find((tip) => tip.slug === slug);
 
   if (!tip) {
     return {
@@ -25,7 +27,8 @@ export async function generateMetadata({
 }
 
 export default function TipPage({ params }: TipPageProps) {
-  const tip = TIPS.find((tip) => tip.slug === params.slug);
+  const { slug } = use(params);
+  const tip = TIPS.find((tip) => tip.slug === slug);
 
   if (!tip) {
     notFound();
