@@ -13,6 +13,7 @@ export interface IDiscountFilter {
   carrier: string;
   useNaverPay: boolean;
   useNaverMembership: boolean;
+  useKakaoPay: boolean;
 }
 
 interface DiscountFilterProps {
@@ -65,6 +66,17 @@ export function DiscountFilter({
             }
           />
           <Label htmlFor="naverpay">네이버페이 사용</Label>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="kakaopay"
+            checked={filter.useKakaoPay}
+            onCheckedChange={(checked) =>
+              handleChange({ useKakaoPay: checked })
+            }
+          />
+          <Label htmlFor="kakaopay">카카오페이 사용</Label>
         </div>
 
         <div className="flex items-center space-x-2">

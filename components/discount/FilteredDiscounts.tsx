@@ -15,6 +15,7 @@ const initialFilter: IDiscountFilter = {
   carrier: "skt", // SKT 멤버십으로 초기값 설정
   useNaverPay: true, // 네이버페이 사용 체크
   useNaverMembership: true, // 네이버 멤버십 사용 체크
+  useKakaoPay: true, // 카카오페이 사용 체크
 };
 
 export function FilteredDiscounts({ discounts }: FilteredDiscountsProps) {

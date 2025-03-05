@@ -50,4 +50,32 @@ export const STORES: IStore[] = [
     thumbnail: "/images/stores/starbucks.png",
     isFavorite: false,
   },
+  {
+    id: "8",
+    name: "투썸플레이스",
+    category: StoreCategory.CAFE,
+    thumbnail: "/images/stores/twosome.png",
+    isFavorite: false,
+  },
+  {
+    id: "9",
+    name: "이디야커피",
+    category: StoreCategory.CAFE,
+    thumbnail: "/images/stores/ediya.png",
+    isFavorite: false,
+  },
+  {
+    id: "10",
+    name: "할리스",
+    category: StoreCategory.CAFE,
+    thumbnail: "/images/stores/hollys.png",
+    isFavorite: false,
+  },
+  {
+    id: "11",
+    name: "빽다방",
+    category: StoreCategory.CAFE,
+    thumbnail: "/images/stores/paikdabang.png",
+    isFavorite: false,
+  },
 ];

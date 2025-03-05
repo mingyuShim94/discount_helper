@@ -17,6 +17,7 @@ export interface IDiscountInfo {
 
 export enum DiscountType {
   NAVERPAY = "네이버페이",
+  KAKAOPAY = "카카오페이",
   MEMBERSHIP = "멤버십",
   NAVERMEMBERSHIP = "네이버 멤버십",
   SPECIAL = "특별할인",

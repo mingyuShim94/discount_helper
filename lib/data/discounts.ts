@@ -166,6 +166,20 @@ export const STORE_DISCOUNTS: Record<
         validUntil: "",
         registrationLink: "https://campaign2.naver.com/npay/cafe/",
       },
+      {
+        id: "mega-kakaopay",
+        type: DiscountType.KAKAOPAY,
+        title: "카카오페이 첫 결제 30% 할인",
+        description: "5,000원 이상 결제시 30% 할인 (최대 2,000원)",
+        conditions: "카카오페이머니로 첫 결제 시에만 적용, 매장 결제만 가능",
+        validUntil: "2025-03-09",
+        tipLinks: [
+          {
+            title: "카페 카카오페이 할인 받는 방법",
+            url: "/tips/cafe-kakao-pay-first-payment-discount",
+          },
+        ],
+      },
     ],
   },
 
@@ -189,5 +203,89 @@ export const STORE_DISCOUNTS: Record<
   "7": {
     storeName: "스타벅스",
     discounts: [],
+  },
+
+  // 투썸플레이스 할인 정보
+  "8": {
+    storeName: "투썸플레이스",
+    discounts: [
+      {
+        id: "twosome-kakaopay",
+        type: DiscountType.KAKAOPAY,
+        title: "카카오페이 첫 결제 30% 할인",
+        description: "5,000원 이상 결제시 30% 할인 (최대 2,000원)",
+        conditions: "카카오페이머니로 첫 결제 시에만 적용, 매장 결제만 가능",
+        validUntil: "2025-03-09",
+        tipLinks: [
+          {
+            title: "카페 카카오페이 할인 받는 방법",
+            url: "/tips/cafe-kakao-pay-first-payment-discount",
+          },
+        ],
+      },
+    ],
+  },
+
+  // 이디야커피 할인 정보
+  "9": {
+    storeName: "이디야커피",
+    discounts: [
+      {
+        id: "ediya-kakaopay",
+        type: DiscountType.KAKAOPAY,
+        title: "카카오페이 첫 결제 30% 할인",
+        description: "5,000원 이상 결제시 30% 할인 (최대 2,000원)",
+        conditions: "카카오페이머니로 첫 결제 시에만 적용, 매장 결제만 가능",
+        validUntil: "2025-03-09",
+        tipLinks: [
+          {
+            title: "카페 카카오페이 할인 받는 방법",
+            url: "/tips/cafe-kakao-pay-first-payment-discount",
+          },
+        ],
+      },
+    ],
+  },
+
+  // 할리스 할인 정보
+  "10": {
+    storeName: "할리스",
+    discounts: [
+      {
+        id: "hollys-kakaopay",
+        type: DiscountType.KAKAOPAY,
+        title: "카카오페이 첫 결제 30% 할인",
+        description: "5,000원 이상 결제시 30% 할인 (최대 2,000원)",
+        conditions: "카카오페이머니로 첫 결제 시에만 적용, 매장 결제만 가능",
+        validUntil: "2025-03-09",
+        tipLinks: [
+          {
+            title: "카페 카카오페이 할인 받는 방법",
+            url: "/tips/cafe-kakao-pay-first-payment-discount",
+          },
+        ],
+      },
+    ],
+  },
+
+  // 빽다방 할인 정보
+  "11": {
+    storeName: "빽다방",
+    discounts: [
+      {
+        id: "paikdabang-kakaopay",
+        type: DiscountType.KAKAOPAY,
+        title: "카카오페이 첫 결제 30% 할인",
+        description: "5,000원 이상 결제시 30% 할인 (최대 2,000원)",
+        conditions: "카카오페이머니로 첫 결제 시에만 적용, 매장 결제만 가능",
+        validUntil: "2025-03-09",
+        tipLinks: [
+          {
+            title: "카페 카카오페이 할인 받는 방법",
+            url: "/tips/cafe-kakao-pay-first-payment-discount",
+          },
+        ],
+      },
+    ],
   },
 };

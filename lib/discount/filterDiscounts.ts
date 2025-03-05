@@ -7,6 +7,9 @@ const carrierDiscountMap: Record<string, string[]> = {
   lg: ["gs25-lg-membership"],
 };
 
+// 카카오페이 할인이 적용되는 카페 매장 ID 목록
+const kakaopayStoreIds = ["5", "8", "9", "10", "11"]; // 메가커피, 투썸플레이스, 이디야커피, 할리스, 빽다방
+
 export function filterDiscounts(
   discounts: IDiscountInfo[],
   filter: IDiscountFilter
@@ -29,6 +32,11 @@ export function filterDiscounts(
 
     // 네이버페이 필터링
     if (discount.type === DiscountType.NAVERPAY && !filter.useNaverPay) {
+      return false;
+    }
+
+    // 카카오페이 필터링
+    if (discount.type === DiscountType.KAKAOPAY && !filter.useKakaoPay) {
       return false;
     }
 

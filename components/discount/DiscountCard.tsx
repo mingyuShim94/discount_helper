@@ -1,27 +1,46 @@
-import { IDiscountInfo } from "@/types/discount";
+import { IDiscountInfo, DiscountType } from "@/types/discount";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ExternalLink, HelpCircle } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 interface IDiscountCardProps {
   discount: IDiscountInfo;
 }
 
 export function DiscountCard({ discount }: IDiscountCardProps) {
+  const router = useRouter();
+
   const handleCardClick = () => {
+    // 카카오페이 할인 정보인 경우 팁 페이지로 이동
+    if (
+      discount.type === DiscountType.KAKAOPAY &&
+      discount.tipLinks &&
+      discount.tipLinks.length > 0
+    ) {
+      router.push(discount.tipLinks[0].url);
+      return;
+    }
+
+    // 기존 로직: 등록 링크가 있는 경우 해당 링크로 이동
     if (discount.registrationLink) {
       window.open(discount.registrationLink, "_blank", "noopener,noreferrer");
     }
   };
 
+  // 카드가 클릭 가능한지 여부 확인
+  const isClickable =
+    discount.registrationLink ||
+    (discount.type === DiscountType.KAKAOPAY &&
+      discount.tipLinks &&
+      discount.tipLinks.length > 0);
+
   return (
     <div
-      onClick={discount.registrationLink ? handleCardClick : undefined}
+      onClick={isClickable ? handleCardClick : undefined}
       className={`${
-        discount.registrationLink
-          ? "cursor-pointer hover:opacity-80 transition-opacity"
-          : ""
+        isClickable ? "cursor-pointer hover:opacity-80 transition-opacity" : ""
       }`}
     >
       <Card>
@@ -34,6 +53,14 @@ export function DiscountCard({ discount }: IDiscountCardProps) {
                 신청하기
               </span>
             )}
+            {discount.type === DiscountType.KAKAOPAY &&
+              discount.tipLinks &&
+              discount.tipLinks.length > 0 && (
+                <span className="text-sm text-primary flex items-center gap-1">
+                  <HelpCircle size={16} />
+                  할인방법 보기
+                </span>
+              )}
           </CardTitle>
         </CardHeader>
         <CardContent>
