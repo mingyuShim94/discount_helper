@@ -7,9 +7,6 @@ const carrierDiscountMap: Record<string, string[]> = {
   lg: ["gs25-lg-membership"],
 };
 
-// 카카오페이 할인이 적용되는 카페 매장 ID 목록
-const kakaopayStoreIds = ["5", "8", "9", "10", "11"]; // 메가커피, 투썸플레이스, 이디야커피, 할리스, 빽다방
-
 export function filterDiscounts(
   discounts: IDiscountInfo[],
   filter: IDiscountFilter
