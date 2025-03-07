@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Percent, Lightbulb } from "lucide-react";
+import { Percent, Lightbulb, MessageCircle } from "lucide-react";
 
 export function Header() {
   return (
@@ -24,6 +24,13 @@ export function Header() {
           >
             <Lightbulb className="h-5 w-5 md:h-6 md:w-6" />
             <span>꿀팁</span>
+          </Link>
+          <Link
+            href="/contact"
+            className="flex items-center gap-2 text-base md:text-lg font-medium hover:text-primary transition-colors px-3 py-2 rounded-md hover:bg-gray-50"
+          >
+            <MessageCircle className="h-5 w-5 md:h-6 md:w-6" />
+            <span>연락하기</span>
           </Link>
         </nav>
       </div>
