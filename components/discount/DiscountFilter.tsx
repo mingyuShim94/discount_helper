@@ -36,6 +36,19 @@ export function DiscountFilter({ value, onChange }: DiscountFilterProps) {
     onChange(updatedFilter);
   };
 
+  const handleCustomCardDiscountRateChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const value = e.target.value;
+
+    // 빈 값이거나 유효한 숫자(소수점 포함)만 허용
+    if (value === "" || /^\d*\.?\d*$/.test(value)) {
+      // 빈 값인 경우 undefined로 설정, 그 외에는 숫자로 변환
+      const numericValue = value === "" ? undefined : parseFloat(value);
+      handleFilterChange({ customCardDiscountRate: numericValue });
+    }
+  };
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -162,16 +175,11 @@ export function DiscountFilter({ value, onChange }: DiscountFilterProps) {
                     <Label htmlFor="discount-rate">할인률 (%)</Label>
                     <Input
                       id="discount-rate"
-                      type="number"
+                      type="text"
                       min={0}
                       max={100}
-                      value={filter.customCardDiscountRate || 5}
-                      onChange={(e) =>
-                        handleFilterChange({
-                          customCardDiscountRate:
-                            parseFloat(e.target.value) || 0,
-                        })
-                      }
+                      value={filter.customCardDiscountRate?.toString() || ""}
+                      onChange={handleCustomCardDiscountRateChange}
                       className="w-24"
                     />
                   </div>
