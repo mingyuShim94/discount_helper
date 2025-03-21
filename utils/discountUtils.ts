@@ -1,5 +1,8 @@
 import { IDiscountInfo, DiscountType } from "@/types/discount";
-import { calculateCombinedDiscount, calculateDiscount } from "@/data/discounts";
+import {
+  calculateCombinedDiscount,
+  calculateDiscount,
+} from "./discountCalculator";
 
 /**
  * 통신사 멤버십과 카드 할인을 결합한 중복 할인 정보를 생성합니다.

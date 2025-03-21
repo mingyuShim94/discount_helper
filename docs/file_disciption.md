@@ -18,9 +18,11 @@ discount_helper/
   │   ├── tips/               # 할인 팁 컴포넌트
   │   └── store/              # 매장 관련 컴포넌트
   ├── lib/                    # 유틸리티 라이브러리
-  │   ├── data/               # 정적 데이터
+  │   ├── data/               # 정적 데이터 (매장 정보 등)
   │   └── discount/           # 할인 관련 유틸리티
   ├── utils/                  # 유틸리티 함수
+  │   ├── discountCalculator.ts # 할인 계산 관련 함수 모음
+  │   └── discountUtils.ts      # 할인 유틸리티 함수
   ├── types/                  # TypeScript 타입 정의
   ├── hooks/                  # React 커스텀 훅
   └── public/                 # 정적 파일
@@ -36,21 +38,26 @@ discount_helper/
 
 주요 기능:
 
+- `isWeekend`: 현재 날짜가 금/토/일(주말)인지 확인하는 함수
 - `calculateOptimalDiscounts`: 입력 금액에 대한 최적 할인 조합 계산
 - `getBestDiscountBreakpoints`: 할인 방법이 변경되는 금액 구간 자동 탐지
+- `calculateDiscount`: 단일 할인에 대한 할인액 계산
+- `calculateCombinedDiscount`: 중복 할인 계산 (멤버십 + 카드 등)
+- 할인 결과에 즉시 할인, 미래 할인(적립금, 캐시백), 체감가, 총 혜택 금액 구분 제공
 - 통신사 멤버십, 네이버 멤버십, 할인카드 등 다양한 할인 수단 조합 처리
 - POP 로고 유무에 따른 할인 계산
 - 통신사 멤버십(KT, U+)의 최소 결제 금액(1,000원) 조건 적용
+- 네이버페이 금/토/일 캐시백 이벤트 처리 (2,000원 이상 결제 시 500원 캐시백)
 
 #### `utils/discountUtils.ts`
 
-할인 계산을 위한 보조 유틸리티 함수들을 제공합니다.
+할인 처리를 위한 보조 유틸리티 함수들을 제공합니다.
 
 주요 기능:
 
 - `findOptimalDiscounts`: 금액에 따른 최적 할인 방법 탐색
-- `calculateDiscount`: 단일 할인에 대한 할인액 계산
-- 중복 할인 처리 및 순위 부여
+- `createCombinedDiscount`: 멤버십과 카드 할인을 결합한 중복 할인 정보 생성
+- `calculateDiscountAmount`: 특정 할인에 대한 할인액 계산
 
 ### 컴포넌트
 
@@ -75,6 +82,11 @@ discount_helper/
 - 현재 금액에 대한 최적 할인 조합 목록 표시
 - 할인 방법이 변경되는 금액 구간 시각화
 - 할인액, 최종 금액, 할인율 정보 제공
+- 즉시 할인과 미래 혜택을 구분하여 표시
+- 체감가 정보 제공 (원래 금액에서 즉시 할인과 미래 혜택을 모두 차감한 금액)
+- 체감가에 대한 툴팁 설명 제공
+- 주말(금/토/일) 및 네이버페이 선택 시 캐시백 이벤트 안내 메시지 표시
+- 네이버페이 주말 캐시백 이벤트 신청 링크 제공
 
 ### 페이지
 
@@ -112,6 +124,14 @@ discount_helper/
 - `DiscountType`: 할인 유형 열거형 (멤버십, 간편결제, 카드 등)
 - `IDiscountInfo`: 할인 정보 인터페이스
 - `IDiscountCalculationResult`: 할인 계산 결과 인터페이스
+  - 할인 방법, 설명, 원래 금액
+  - instantDiscountAmount: 즉시 할인 금액 (결제 시점에 차감)
+  - futureDiscountAmount: 미래 할인 금액 (적립금, 캐시백 등 후속 혜택)
+  - totalBenefitAmount: 총 혜택 금액 (즉시 할인 + 미래 할인)
+  - finalAmount: 실제 결제 금액 (원래 금액 - 즉시 할인)
+  - perceivedAmount: 체감가 (원래 금액 - 즉시 할인 - 미래 할인)
+  - 할인율, 순위, 기타 정보 포함
+  - 네이버페이 주말 캐시백과 같은 특별 이벤트 정보 처리
 
 ### 데이터 및 유틸리티
 
@@ -124,15 +144,6 @@ discount_helper/
 - 매장 목록 및 상세 정보 제공
 - 매장 카테고리 정보
 
-#### `lib/data/discounts.ts`
-
-매장별 할인 정보 데이터를 관리합니다.
-
-주요 기능:
-
-- 매장별 할인 수단 목록
-- 할인 상세 정보 (할인율, 조건, 제한사항 등)
-
 #### `lib/discount/filterDiscounts.ts`
 
 선택된 필터에 따라 적용 가능한 할인을 필터링합니다.
@@ -141,14 +152,3 @@ discount_helper/
 
 - 사용자 선택에 따른 할인 필터링
 - 통신사 멤버십, 네이버 멤버십, 결제 방법별 할인 필터링
-
-### 커스텀 훅
-
-#### `hooks/useStoreDiscounts.ts`
-
-매장별 할인 정보를 로드하는 커스텀 훅입니다.
-
-주요 기능:
-
-- 매장 ID에 따른 할인 정보 로드
-- 로딩 및 에러 상태 관리
