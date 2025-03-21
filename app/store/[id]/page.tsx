@@ -1,13 +1,18 @@
 "use client";
 export const runtime = "edge";
 
-import { Suspense } from "react";
-import { FilteredDiscounts } from "@/components/discount/FilteredDiscounts";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
-import { Card } from "@/components/ui/card";
+import { useEffect, useState, use } from "react";
+import { IStore } from "@/types/store";
+import { STORES } from "@/lib/data/stores";
 import { useStoreDiscounts } from "@/hooks/useStoreDiscounts";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { ErrorMessage } from "@/components/ui/ErrorMessage";
-import { use } from "react";
+import {
+  DiscountFilter,
+  IDiscountFilter,
+} from "@/components/discount/DiscountFilter";
+import { DiscountResult } from "@/components/discount/DiscountResult";
+import { DEFAULT_DISCOUNT_FILTER } from "@/types/discountFilter";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -15,24 +20,96 @@ interface PageProps {
 
 export default function StorePage({ params }: PageProps) {
   const { id } = use(params);
-  const { storeData, isLoading, error } = useStoreDiscounts(id);
+  const [store, setStore] = useState<IStore | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const [discountFilter, setDiscountFilter] = useState<IDiscountFilter>(
+    DEFAULT_DISCOUNT_FILTER
+  );
+  const { isLoading: isLoadingDiscounts, error: discountError } =
+    useStoreDiscounts(id);
 
-  if (isLoading) return <LoadingSpinner />;
-  if (error) return <ErrorMessage message={error.message} />;
+  // 매장 정보 로드
+  useEffect(() => {
+    const fetchStore = () => {
+      try {
+        setIsLoading(true);
 
-  if (!storeData)
-    return <ErrorMessage message="할인 정보를 불러올 수 없습니다." />;
+        // 정적 데이터에서 매장 정보 가져오기
+        const foundStore = STORES.find((store) => store.id === id);
+
+        if (!foundStore) {
+          throw new Error("매장 정보를 찾을 수 없습니다.");
+        }
+
+        setStore(foundStore);
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err
+            : new Error("알 수 없는 오류가 발생했습니다.")
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchStore();
+  }, [id]);
+
+  // 할인 필터 변경 핸들러
+  const handleFilterChange = (newFilter: IDiscountFilter) => {
+    setDiscountFilter(newFilter);
+  };
+
+  if (isLoading || isLoadingDiscounts) {
+    return (
+      <div className="container mx-auto px-4 py-8 flex justify-center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  if (error || !store) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <ErrorMessage
+          message={error?.message || "매장 정보를 로드할 수 없습니다."}
+        />
+      </div>
+    );
+  }
+
+  // 할인 정보 표시 영역의 에러 처리
+  if (discountError) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-8">{store.name} 할인 정보</h1>
+        <ErrorMessage message="할인 정보를 불러오는 중 오류가 발생했습니다." />
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">
-        {storeData.storeName} 할인 정보
-      </h1>
-      <Suspense fallback={<LoadingSpinner />}>
-        <Card className="p-6">
-          <FilteredDiscounts discounts={storeData.discounts} />
-        </Card>
-      </Suspense>
+      <div className="flex items-center mb-8">
+        <h1 className="text-3xl font-bold">{store.name} 할인 정보</h1>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* 할인 수단 선택 */}
+        <div className="md:col-span-1">
+          <DiscountFilter
+            value={discountFilter}
+            onChange={handleFilterChange}
+          />
+        </div>
+
+        {/* 최적 할인 정보 표시 */}
+        <div className="md:col-span-2">
+          <DiscountResult filter={discountFilter} />
+        </div>
+      </div>
     </div>
   );
 }
