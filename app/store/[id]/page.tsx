@@ -83,27 +83,6 @@ export default function StorePage({ params }: PageProps) {
         <h1 className="text-3xl font-bold">{store.name} 할인 정보</h1>
       </div>
 
-      <div className="p-4 mb-4 bg-blue-50 rounded-lg border border-blue-200">
-        <h2 className="text-lg font-semibold text-blue-800 mb-2">
-          할인 금액 용어 설명
-        </h2>
-        <ul className="list-disc ml-5 text-blue-700 text-sm">
-          <li>
-            <span className="font-medium">최종 결제 금액</span>: 실제 결제
-            시점에 지불하는 금액 (즉시 할인만 적용)
-          </li>
-          <li>
-            <span className="font-medium">체감가</span>: 원래 금액에서 즉시
-            할인과 미래 혜택(적립금, 캐시백)을 모두 뺀 금액 (소비자가 실질적으로
-            체감하는 가격)
-          </li>
-          <li>
-            <span className="font-medium">미래 혜택</span>: 적립금이나
-            캐시백처럼 나중에 받게 되는 혜택 금액
-          </li>
-        </ul>
-      </div>
-
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* 할인 수단 선택 */}
         <div className="md:col-span-1">
