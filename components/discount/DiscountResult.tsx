@@ -44,13 +44,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
  * @returns 금/토/일이면 true, 아니면 false
  */
 function isWeekend(): boolean {
-  // 한국 시간(KST)으로 현재 날짜 가져오기
   const now = new Date();
-  const kstNow = new Date(now.getTime() + 9 * 60 * 60 * 1000); // UTC+9 시간
-
-  const day = kstNow.getDay(); // 0: 일요일, 1: 월요일, ..., 6: 토요일
-
-  // 금요일(5), 토요일(6), 일요일(0)인 경우 true 반환
+  const day = now.getDay(); // 0: 일요일, 1: 월요일, ..., 6: 토요일
   return day === 0 || day === 5 || day === 6;
 }
 
@@ -252,11 +247,22 @@ export function DiscountResult({
           <p className="font-medium">네이버페이 금/토/일 캐시백 이벤트!</p>
           <p className="text-sm">
             오늘은{" "}
-            {new Date().getDay() === 5
-              ? "금요일"
-              : new Date().getDay() === 6
-              ? "토요일"
-              : "일요일"}
+            {(() => {
+              const now = new Date();
+              const day = now.getDay();
+
+              const dayMap: { [key: number]: string } = {
+                0: "일요일",
+                1: "월요일",
+                2: "화요일",
+                3: "수요일",
+                4: "목요일",
+                5: "금요일",
+                6: "토요일",
+              };
+
+              return dayMap[day] || "평일";
+            })()}
             입니다! 네이버페이로 2,000원 이상 결제 시 500원 캐시백이 적용됩니다.
             (단, 이벤트 사전 신청 필요)
           </p>
