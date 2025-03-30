@@ -1,3 +1,10 @@
+/**
+ * DiscountResult 컴포넌트
+ *
+ * 사용자가 입력한 금액과 선택한 할인 옵션에 따라 최적의 할인 방법을 계산하고 표시하는 컴포넌트입니다.
+ * 모바일과 데스크톱 환경에 따라 다른 UI를 제공하며, 할인 정보를 직관적으로 표시합니다.
+ */
+
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -25,11 +32,6 @@ import {
   HelpCircle,
   Gift,
   Zap,
-  Plus,
-  X,
-  Trash2,
-  ChevronDown,
-  ChevronUp,
   Crown,
   ListFilter,
   Info,
@@ -41,7 +43,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 /**
  * 현재 한국 시간 기준 요일이 금/토/일인지 확인합니다.
- * @returns 금/토/일이면 true, 아니면 false
+ * @returns {boolean} 금/토/일이면 true, 아니면 false
  */
 function isWeekend(): boolean {
   const now = new Date();
@@ -49,17 +51,24 @@ function isWeekend(): boolean {
   return day === 0 || day === 5 || day === 6;
 }
 
+/**
+ * DiscountResult 컴포넌트의 Props 인터페이스
+ * @interface DiscountResultProps
+ * @property {number} [amount] - 계산할 금액 (기본값: 0)
+ * @property {IDiscountFilter} [filter] - 할인 필터 옵션
+ */
 interface DiscountResultProps {
   amount?: number;
   filter?: IDiscountFilter;
 }
 
-// 계산 히스토리 항목 인터페이스
-interface ICalculationItem {
-  id: string;
-  amount: number;
-  description: string;
-}
+/**
+ * 계산 히스토리 항목 인터페이스
+ * @interface ICalculationItem
+ * @property {string} id - 항목의 고유 식별자
+ * @property {number} amount - 항목의 금액
+ * @property {string} description - 항목에 대한 설명
+ */
 
 export function DiscountResult({
   amount = 0,
@@ -72,20 +81,20 @@ export function DiscountResult({
     useCardDiscount: false,
   },
 }: DiscountResultProps) {
+  // #region State 관리
+  // 금액 관련 상태
   const [amountStr, setAmountStr] = useState<string>("");
   const [currentAmount, setCurrentAmount] = useState<number>(amount || 5000);
   const [hasPOPLogo, setHasPOPLogo] = useState<boolean>(false);
 
-  // 계산 히스토리 관련 상태
-  const [calculationItems, setCalculationItems] = useState<ICalculationItem[]>(
-    []
+  // UI 상태 관리
+  const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>(
+    {}
   );
-  const [itemAmountStr, setItemAmountStr] = useState<string>("");
-  const [itemDescription, setItemDescription] = useState<string>("");
-  const [isCalculatorExpanded, setIsCalculatorExpanded] =
-    useState<boolean>(false);
+  const isMobile = useMediaQuery("(max-width: 768px)");
+  // #endregion
 
-  // amountStr 초기화를 위한 useEffect 추가
+  // #region 초기화 및 상태 업데이트
   useEffect(() => {
     // 컴포넌트 마운트 시 현재 금액으로 amountStr을 초기화
     if (amountStr === "" && currentAmount > 0) {
@@ -93,106 +102,34 @@ export function DiscountResult({
     }
   }, [amountStr, currentAmount]);
 
-  // 카드 확장/축소 관련 상태
-  const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>(
-    {}
-  );
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  // filter가 변경될 때마다 드롭다운을 모두 접기
+  useEffect(() => {
+    const initialExpandedState: Record<string, boolean> = {};
+    discountResults.forEach((discount) => {
+      initialExpandedState[discount.method] = false;
+    });
+    setExpandedCards(initialExpandedState);
+  }, [filter]);
+  // #endregion
 
-  // 카드 확장/축소 토글 함수
-  const toggleCardExpansion = (method: string) => {
-    setExpandedCards((prev) => ({
-      ...prev,
-      [method]: !prev[method],
-    }));
-  };
-
-  const handleItemAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    // 숫자와 기본 수학 연산자만 허용
-    if (/^[\d+\-*/.]*$/.test(value)) {
-      setItemAmountStr(value);
-    }
-  };
-
-  const handleDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setItemDescription(e.target.value);
-  };
-
-  const addCalculationItem = () => {
-    if (!itemAmountStr) return;
-
-    let amount = 0;
-
-    try {
-      // 수학 표현식 계산 시도
-      amount = Math.floor(
-        Function('"use strict";return (' + itemAmountStr + ")")()
-      );
-    } catch {
-      // 표현식 계산 실패 시 단순 parseInt 사용
-      amount = parseInt(itemAmountStr);
-    }
-
-    // 유효한 금액인 경우만 추가
-    if (!isNaN(amount) && amount > 0) {
-      const newItem: ICalculationItem = {
-        id: Date.now().toString(),
-        amount: amount,
-        description: itemDescription || `항목 ${calculationItems.length + 1}`,
-      };
-
-      setCalculationItems((prev) => [...prev, newItem]);
-      setItemAmountStr("");
-      setItemDescription("");
-
-      // 총액 업데이트
-      const newTotal =
-        calculationItems.reduce((sum, item) => sum + item.amount, 0) + amount;
-      setCurrentAmount(newTotal);
-      setAmountStr(newTotal.toString());
-    }
-  };
-
-  const removeCalculationItem = (id: string) => {
-    const itemToRemove = calculationItems.find((item) => item.id === id);
-    if (!itemToRemove) return;
-
-    setCalculationItems((prev) => prev.filter((item) => item.id !== id));
-
-    // 총액 업데이트
-    const newTotal =
-      calculationItems.reduce((sum, item) => sum + item.amount, 0) -
-      itemToRemove.amount;
-    setCurrentAmount(newTotal > 0 ? newTotal : 0);
-    setAmountStr(newTotal > 0 ? newTotal.toString() : "");
-  };
-
-  const clearAllItems = () => {
-    setCalculationItems([]);
-    setCurrentAmount(0);
-    setAmountStr("");
-  };
-
+  // #region 이벤트 핸들러
+  /**
+   * 직접 금액 입력 핸들러
+   * 수학 표현식 계산 지원
+   */
   const handleDirectAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setAmountStr(value);
 
-    // 숫자와 기본 수학 연산자만 허용
-    if (!/^[\d+\-*/.]*$/.test(value)) {
-      return;
-    }
+    if (!/^[\d+\-*/.]*$/.test(value)) return;
 
     let calculatedAmount = 0;
-
     if (value) {
       try {
-        // 수학 표현식 계산 시도
         calculatedAmount = Math.floor(
           Function('"use strict";return (' + value + ")")()
         );
       } catch {
-        // 표현식 계산 실패 시 단순 parseInt 사용
         calculatedAmount = parseInt(value);
       }
 
@@ -204,41 +141,33 @@ export function DiscountResult({
     }
   };
 
-  // 입력 필드 포커스 핸들러
+  /**
+   * 금액 입력 필드 포커스 핸들러
+   */
   const handleAmountFocus = () => {
-    // 입력 필드를 비움
     setAmountStr("");
   };
 
-  // POP 로고 변경 핸들러
+  /**
+   * POP 로고 체크박스 변경 핸들러
+   */
   const handlePOPLogoChange = (checked: boolean) => {
     setHasPOPLogo(checked);
   };
+  // #endregion
 
+  // #region 할인 계산 및 데이터 처리
   const discountResults = calculateOptimalDiscounts(
     currentAmount,
     filter,
     hasPOPLogo
   );
-
-  // 주말 여부와 네이버페이 선택 여부에 따라 안내 메시지 표시
   const showWeekendMessage = isWeekend() && filter.useNaverPay;
-
-  // 최적의 결제 방법 찾기 (rank 기준으로 정렬)
   const bestDiscount =
     discountResults.length > 0
       ? discountResults.sort((a, b) => a.rank - b.rank)[0]
       : null;
-
-  // filter가 변경될 때마다 드롭다운을 모두 접도록 useEffect 추가
-  useEffect(() => {
-    // 모든 카드를 접힌 상태로 초기화
-    const initialExpandedState: Record<string, boolean> = {};
-    discountResults.forEach((discount) => {
-      initialExpandedState[discount.method] = false;
-    });
-    setExpandedCards(initialExpandedState);
-  }, [filter]); // discountResults 의존성 제거
+  // #endregion
 
   return (
     <div className="space-y-4">
@@ -291,12 +220,10 @@ export function DiscountResult({
             )}
           </CardTitle>
 
-          {/* 금액 입력 개선 UI */}
+          {/* 금액 입력 UI */}
           <div className="mt-4">
             <div
-              className={`flex ${
-                isMobile ? "flex-col" : "items-center"
-              } gap-2 mb-2`}
+              className={`flex ${isMobile ? "flex-col" : "items-center"} gap-2`}
             >
               <Label className={isMobile ? "mb-1" : "mr-2"}>총 금액:</Label>
               <div className="flex-1 flex items-center">
@@ -305,12 +232,11 @@ export function DiscountResult({
                   value={amountStr}
                   onChange={handleDirectAmountChange}
                   onFocus={handleAmountFocus}
-                  placeholder="5000"
+                  placeholder="예상결제 금액을 입력해주세요"
                   className="w-full"
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
                       e.preventDefault();
-                      // Enter 키를 누르면 입력된 값으로 계산
                       if (amountStr) {
                         let calculatedAmount = 0;
                         try {
@@ -332,111 +258,44 @@ export function DiscountResult({
                   }}
                 />
                 <span className="ml-2 mr-2">원</span>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  className="whitespace-nowrap"
-                  onClick={() => {
-                    // 버튼 클릭 시 입력된 값으로 계산
-                    if (amountStr) {
-                      let calculatedAmount = 0;
-                      try {
-                        calculatedAmount = Math.floor(
-                          Function('"use strict";return (' + amountStr + ")")()
-                        );
-                      } catch {
-                        calculatedAmount = parseInt(amountStr);
-                      }
-                      if (!isNaN(calculatedAmount)) {
-                        setCurrentAmount(
-                          calculatedAmount >= 0 ? calculatedAmount : 0
-                        );
-                      }
-                    }
-                  }}
-                >
-                  할인 계산
-                </Button>
               </div>
+            </div>
+            {/* 금액 조절 버튼 */}
+            <div className={`flex gap-2 ${isMobile ? "mt-2" : "mt-3"}`}>
               <Button
+                size="sm"
                 variant="outline"
-                size={isMobile ? "default" : "sm"}
-                className={isMobile ? "w-full mt-2" : "ml-2"}
-                onClick={() => setIsCalculatorExpanded(!isCalculatorExpanded)}
+                onClick={() => {
+                  const newAmount = currentAmount + 1000;
+                  setCurrentAmount(newAmount);
+                  setAmountStr(newAmount.toString());
+                }}
               >
-                {isCalculatorExpanded ? "간편계산 접기" : "간편계산 펼치기"}
+                +1,000원
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  const newAmount = currentAmount + 100;
+                  setCurrentAmount(newAmount);
+                  setAmountStr(newAmount.toString());
+                }}
+              >
+                +100원
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-red-500 hover:text-red-600"
+                onClick={() => {
+                  setCurrentAmount(0);
+                  setAmountStr("");
+                }}
+              >
+                초기화
               </Button>
             </div>
-
-            {isCalculatorExpanded && (
-              <div className="border rounded-md p-3 bg-slate-50 mt-2">
-                <div className="text-sm font-medium mb-2">간편 계산기</div>
-
-                {/* 항목 추가 입력 필드 */}
-                <div className="flex gap-2 mb-3">
-                  <Input
-                    type="text"
-                    value={itemAmountStr}
-                    onChange={handleItemAmountChange}
-                    placeholder="가격 (예: 1200+800)"
-                    className="w-1/2"
-                  />
-                  <Input
-                    type="text"
-                    value={itemDescription}
-                    onChange={handleDescriptionChange}
-                    placeholder="상품명 (선택사항)"
-                    className="w-1/2"
-                  />
-                  <Button size="sm" onClick={addCalculationItem}>
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                {/* 계산 항목 목록 */}
-                {calculationItems.length > 0 && (
-                  <div className="space-y-2 max-h-32 overflow-y-auto mb-2">
-                    {calculationItems.map((item) => (
-                      <div
-                        key={item.id}
-                        className="flex justify-between items-center bg-white p-2 rounded text-sm"
-                      >
-                        <div className="flex-1">{item.description}</div>
-                        <div className="font-medium mr-2">
-                          {item.amount.toLocaleString()}원
-                        </div>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-6 w-6 p-0"
-                          onClick={() => removeCalculationItem(item.id)}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* 항목 합계 및 초기화 버튼 */}
-                {calculationItems.length > 0 && (
-                  <div className="flex justify-between items-center pt-2 border-t">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="text-red-500"
-                      onClick={clearAllItems}
-                    >
-                      <Trash2 className="h-3 w-3 mr-1" />
-                      모두 지우기
-                    </Button>
-                    <div className="font-medium">
-                      합계: {currentAmount.toLocaleString()}원
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
 
           <div
@@ -626,9 +485,6 @@ export function DiscountResult({
                                   ? "bg-primary/5"
                                   : ""
                               } cursor-pointer`}
-                              onClick={() =>
-                                toggleCardExpansion(discount.method)
-                              }
                             >
                               <div className="flex justify-between items-start">
                                 <div className="space-y-2">
@@ -685,13 +541,6 @@ export function DiscountResult({
                                       {(discount.discountRate * 100).toFixed(1)}
                                       %
                                     </span>
-                                  </div>
-                                  <div className="mt-1">
-                                    {expandedCards[discount.method] ? (
-                                      <ChevronUp className="h-5 w-5 text-gray-500" />
-                                    ) : (
-                                      <ChevronDown className="h-5 w-5 text-gray-500" />
-                                    )}
                                   </div>
                                 </div>
                               </div>
