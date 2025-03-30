@@ -145,7 +145,7 @@ export default function StorePage({ params }: PageProps) {
                 <h2 className="text-lg font-semibold mb-4">
                   2단계: 최적의 결제 방법
                 </h2>
-                <DiscountResult filter={discountFilter} />
+                <DiscountResult filter={discountFilter} storeId={id} />
               </>
             )}
           </div>
@@ -183,7 +183,7 @@ export default function StorePage({ params }: PageProps) {
             />
           </div>
           <div className="md:col-span-2">
-            <DiscountResult filter={discountFilter} />
+            <DiscountResult filter={discountFilter} storeId={id} />
           </div>
         </div>
       )}

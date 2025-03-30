@@ -41,6 +41,8 @@ discount_helper/
 
 - `isWeekend`: 현재 날짜가 금/토/일(주말)인지 확인하는 함수
 - `calculateOptimalDiscounts`: 입력 금액에 대한 최적 할인 조합 계산
+  - **매장 ID(storeId)를 입력받아 해당 매장의 할인 정책을 동적으로 적용**
+  - **lib/data/discountRules.ts에서 getDiscountRules 함수를 통해 매장별 할인 정책 가져옴**
 - `calculateDiscount`: 단일 할인에 대한 할인액 계산
 - `calculateCombinedDiscount`: 중복 할인 계산 (멤버십 + 카드 등)
 - 할인 결과에 즉시 할인, 미래 할인(적립금, 캐시백), 체감가, 총 혜택 금액 구분 제공
@@ -49,6 +51,7 @@ discount_helper/
 - 통신사 멤버십(KT, U+)의 최소 결제 금액(1,000원) 조건 적용
 - 네이버페이 금/토/일 캐시백 이벤트 처리 (2,000원 이상 결제 시 500원 캐시백)
 - 통신사 멤버십 + 네이버페이 주말 캐시백 조합 처리 (통신사 할인 후 남은 금액으로 네이버페이 결제)
+- **매장별 특화된 할인 규칙 적용 (CU의 KT 멤버십 시간 제한 및 상품 카테고리 제한 등)**
 
 #### `utils/discountUtils.ts`
 
@@ -79,6 +82,7 @@ discount_helper/
 
 주요 기능:
 
+- **storeId 프로퍼티를 통해 매장별 맞춤형 할인 정책 적용**
 - 금액 입력 및 POP 로고 유무 선택 UI
 - 기본 금액(5,000원) 제시
 - 입력 필드 포커스 시 자동 비우기
@@ -112,6 +116,8 @@ discount_helper/
 주요 기능:
 
 - 매장 정보 로드 및 표시
+- URL 파라미터를 통해 받은 매장 ID(id)를 DiscountResult 컴포넌트에 전달
+- 매장별 할인 정책이 자동으로 적용되어 해당 매장에 맞는 최적 할인 계산
 - DiscountFilter와 DiscountResult 컴포넌트 조합
 - 할인 필터 상태 관리
 - 로딩 및 에러 상태 처리
@@ -158,6 +164,30 @@ discount_helper/
 
 - 매장 목록 및 상세 정보 제공
 - 매장 카테고리 정보
+- 현재 지원 매장:
+  - GS25
+  - CU
+  - 세븐일레븐
+  - 이마트24
+
+#### `lib/data/discountRules.ts`
+
+매장별 할인 정책 데이터를 정의하고 관리합니다.
+
+주요 기능:
+
+- 매장별 할인 정책을 체계적으로 정의하는 인터페이스(IDiscountRule) 제공
+- 각 매장의 통신사 멤버십 할인 세부 정보 관리
+  - 통신사별 할인율, 제한사항, 제외상품 등
+- 네이버 멤버십 할인 정보 관리
+  - 즉시할인율, 포인트적립율, 최대적립한도, 상품제한 등
+- 네이버페이 주말 캐시백 정보 관리
+- 매장 ID로 할인 정책을 조회하는 getDiscountRules 함수 제공
+- 현재 지원 매장별 할인 정책:
+  - GS25 (storeId: "1")
+  - CU (storeId: "2")
+  - 세븐일레븐 (storeId: "3")
+  - 이마트24 (storeId: "4")
 
 #### `lib/discount/filterDiscounts.ts`
 

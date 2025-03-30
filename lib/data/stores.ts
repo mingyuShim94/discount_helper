@@ -6,6 +6,27 @@ export const STORES: IStore[] = [
     name: "GS25",
     category: StoreCategory.CONVENIENCE,
     thumbnail: "/images/stores/gs25.png",
+    isFavorite: true,
+  },
+  {
+    id: "2",
+    name: "CU",
+    category: StoreCategory.CONVENIENCE,
+    thumbnail: "/images/stores/cu.png",
+    isFavorite: false,
+  },
+  {
+    id: "3",
+    name: "세븐일레븐",
+    category: StoreCategory.CONVENIENCE,
+    thumbnail: "/images/stores/711.png",
+    isFavorite: false,
+  },
+  {
+    id: "4",
+    name: "이마트24",
+    category: StoreCategory.CONVENIENCE,
+    thumbnail: "/images/stores/emart24.png",
     isFavorite: false,
   },
 ];

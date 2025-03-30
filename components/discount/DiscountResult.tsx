@@ -56,10 +56,12 @@ function isWeekend(): boolean {
  * @interface DiscountResultProps
  * @property {number} [amount] - 계산할 금액 (기본값: 0)
  * @property {IDiscountFilter} [filter] - 할인 필터 옵션
+ * @property {string} [storeId] - 매장 ID
  */
 interface DiscountResultProps {
   amount?: number;
   filter?: IDiscountFilter;
+  storeId?: string;
 }
 
 /**
@@ -80,6 +82,7 @@ export function DiscountResult({
     useTossPay: false,
     useCardDiscount: false,
   },
+  storeId = "1", // 기본값은 GS25
 }: DiscountResultProps) {
   // #region State 관리
   // 금액 관련 상태
@@ -160,7 +163,8 @@ export function DiscountResult({
   const discountResults = calculateOptimalDiscounts(
     currentAmount,
     filter,
-    hasPOPLogo
+    hasPOPLogo,
+    storeId
   );
   const showWeekendMessage = isWeekend() && filter.useNaverPay;
   const bestDiscount =

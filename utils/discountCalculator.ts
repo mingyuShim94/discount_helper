@@ -1,4 +1,5 @@
 import { IDiscountFilter } from "@/types/discountFilter";
+import { getDiscountRules } from "@/lib/data/discountRules";
 
 /**
  * 현재 한국 시간 기준 요일이 금/토/일인지 확인합니다.
@@ -118,15 +119,50 @@ const MIN_PURCHASE_AMOUNTS = {
   CARD: 0, // 할인 카드 최소 결제 금액 (제한 없음)
 };
 
+// 타입 정의 추가
+interface CarrierMembershipInfo {
+  enabled: boolean;
+  discountRate: number;
+  restrictions?: string[];
+  excludedProducts?: string[];
+  timeRestriction?: {
+    startHour: number;
+    endHour: number;
+  };
+  productRestriction?: string;
+}
+
 /**
- * GS25의 할인 정보를 바탕으로 최적 할인을 계산합니다.
+ * 각 매장의 할인 정보를 바탕으로 최적 할인을 계산합니다.
  */
 export function calculateOptimalDiscounts(
   amount: number,
   filter: IDiscountFilter,
-  hasPOPLogo: boolean = false
+  hasPOPLogo: boolean = false,
+  storeId: string = "1" // 기본값은 GS25
 ): IDiscountCalculationResult[] {
   const results: IDiscountCalculationResult[] = [];
+
+  // 매장의 할인 정책 가져오기
+  const discountRules = getDiscountRules(storeId);
+
+  if (!discountRules) {
+    // 할인 정책이 없는 경우 빈 결과 반환
+    return [
+      {
+        method: "할인 없음",
+        description: "이 매장에 대한 할인 정책 정보가 없습니다",
+        originalAmount: amount,
+        instantDiscountAmount: 0,
+        futureDiscountAmount: 0,
+        totalBenefitAmount: 0,
+        finalAmount: amount,
+        perceivedAmount: amount,
+        discountRate: 0,
+        rank: 1,
+      },
+    ];
+  }
 
   // 현재 주말인지 확인
   const isWeekendNow = isWeekend();
@@ -138,185 +174,263 @@ export function calculateOptimalDiscounts(
     isWeekendNow &&
     amount >= MIN_PURCHASE_AMOUNTS.CARRIER
   ) {
-    // KT, LG(U+) 멤버십 1,000원당 100원 할인
-    const carrierDiscountAmount = Math.floor(amount / 1000) * 100;
-    const remainingAmount = amount - carrierDiscountAmount;
+    // 선택한 통신사 멤버십 정보 가져오기
+    const carrierInfo =
+      filter.carrier === "kt"
+        ? discountRules.carrierMembership.kt
+        : discountRules.carrierMembership.lg;
 
-    // 네이버페이 캐시백은 2,000원 이상 결제 시 적용
-    let cashbackAmount = 0;
-    if (remainingAmount >= 2000) {
-      cashbackAmount = 500; // 500원 고정 캐시백
+    // 타입 안전성을 위한 체크
+    if (
+      carrierInfo &&
+      typeof carrierInfo === "object" &&
+      "enabled" in carrierInfo &&
+      carrierInfo.enabled &&
+      "discountRate" in carrierInfo
+    ) {
+      // carrierInfo를 적절한 타입으로 단언
+      const typedCarrierInfo = carrierInfo as CarrierMembershipInfo;
+
+      // 할인율 적용 (1,000원당 X원 할인)
+      const carrierDiscountAmount =
+        Math.floor(amount / 1000) * (typedCarrierInfo.discountRate * 1000);
+      const remainingAmount = amount - carrierDiscountAmount;
+
+      // 네이버페이 주말 캐시백 정보 가져오기
+      const naverPayWeekend = discountRules.naverPayWeekend;
+
+      // 네이버페이 캐시백은 최소 금액 이상 결제 시 적용
+      let cashbackAmount = 0;
+      if (
+        naverPayWeekend.enabled &&
+        remainingAmount >= naverPayWeekend.minAmount
+      ) {
+        cashbackAmount = naverPayWeekend.cashbackAmount;
+      }
+
+      const totalBenefitAmount = carrierDiscountAmount + cashbackAmount;
+
+      results.push({
+        method: `${
+          filter.carrier === "kt" ? "KT" : "U+"
+        } 멤버십 + 네이버페이 주말 캐시백`,
+        description: `1,000원당 ${
+          typedCarrierInfo.discountRate * 1000
+        }원 할인 후 네이버페이로 결제하여 ${cashbackAmount}원 캐시백`,
+        originalAmount: amount,
+        instantDiscountAmount: carrierDiscountAmount,
+        futureDiscountAmount: cashbackAmount,
+        totalBenefitAmount: totalBenefitAmount,
+        finalAmount: amount - carrierDiscountAmount, // 즉시할인만 차감
+        perceivedAmount: amount - totalBenefitAmount, // 즉시할인 + 캐시백 차감
+        discountRate: totalBenefitAmount / amount,
+        rank: 1,
+        note: "통신사 멤버십 적용 후 네이버페이로 결제, 네이버페이 주말 캐시백 사전 신청 필수",
+      });
     }
-
-    const totalBenefitAmount = carrierDiscountAmount + cashbackAmount;
-
-    results.push({
-      method: `${
-        filter.carrier === "kt" ? "KT" : "U+"
-      } 멤버십 + 네이버페이 주말 캐시백`,
-      description: `1,000원당 100원 할인 후 네이버페이로 결제하여 500원 캐시백`,
-      originalAmount: amount,
-      instantDiscountAmount: carrierDiscountAmount,
-      futureDiscountAmount: cashbackAmount,
-      totalBenefitAmount: totalBenefitAmount,
-      finalAmount: amount - carrierDiscountAmount, // 즉시할인만 차감
-      perceivedAmount: amount - totalBenefitAmount, // 즉시할인 + 캐시백 차감
-      discountRate: totalBenefitAmount / amount,
-      rank: 1,
-      note: "통신사 멤버십 적용 후 네이버페이로 결제, 네이버페이 주말 캐시백 사전 신청 필수",
-    });
   }
 
-  // 네이버페이 선택 & 주말 & 2,000원 이상인 경우 주말 캐시백 적용
-  if (filter.useNaverPay && isWeekendNow && amount >= 2000) {
-    const cashbackAmount = 500; // 500원 고정 캐시백
+  // 네이버페이 선택 & 주말 & 최소 금액 이상인 경우 주말 캐시백 적용
+  if (
+    filter.useNaverPay &&
+    isWeekendNow &&
+    discountRules.naverPayWeekend.enabled
+  ) {
+    const naverPayWeekend = discountRules.naverPayWeekend;
 
-    results.push({
-      method: "네이버페이 주말 캐시백",
-      description: "2,000원 이상 결제 시 500원 캐시백",
-      originalAmount: amount,
-      instantDiscountAmount: 0,
-      futureDiscountAmount: cashbackAmount,
-      totalBenefitAmount: cashbackAmount,
-      finalAmount: amount, // 캐시백은 미래 혜택이므로 실제 결제 금액에서 차감되지 않음
-      perceivedAmount: amount,
-      discountRate: cashbackAmount / amount,
-      rank: 1,
-      note: "금/토/일 한정, 포인트머니 결제 필요, 하루 1회 (주 최대 3회), 사전 신청 필수",
-    });
-  }
+    if (amount >= naverPayWeekend.minAmount) {
+      const cashbackAmount = naverPayWeekend.cashbackAmount;
 
-  // 네이버 멤버십 + 네이버페이 (POP로고 있는 상품만 적용)
-  if (filter.useNaverMembership && filter.useNaverPay && hasPOPLogo) {
-    const discountRate = 0.1; // 10% 즉시할인
-    const pointRate = 0.1; // 10% 포인트적립
-    const discountAmount = amount * discountRate; // 즉시할인 금액
-    const pointAmount = amount * pointRate; // 포인트적립 금액 (원래 금액 기준)
-    const maxPointAmount = Math.min(pointAmount, 5000); // 최대 5,000원 적립 제한
-
-    // 즉시 할인 후 금액 계산
-    const amountAfterDiscount = amount - discountAmount;
-
-    // 할인 후 금액이 2,000원 이상이면서 주말인 경우 캐시백 적용
-    let cashbackAmount = 0;
-    if (isWeekendNow && amountAfterDiscount >= 2000) {
-      cashbackAmount = 500; // 주말 캐시백
+      results.push({
+        method: "네이버페이 주말 캐시백",
+        description: `${naverPayWeekend.minAmount}원 이상 결제 시 ${cashbackAmount}원 캐시백`,
+        originalAmount: amount,
+        instantDiscountAmount: 0,
+        futureDiscountAmount: cashbackAmount,
+        totalBenefitAmount: cashbackAmount,
+        finalAmount: amount, // 캐시백은 미래 혜택이므로 실제 결제 금액에서 차감되지 않음
+        perceivedAmount: amount - cashbackAmount,
+        discountRate: cashbackAmount / amount,
+        rank: 1,
+        note: "금/토/일 한정, 포인트머니 결제 필요, 하루 1회 (주 최대 3회), 사전 신청 필수",
+      });
     }
-
-    const futureDiscountAmount = maxPointAmount + cashbackAmount;
-    const totalBenefitAmount = discountAmount + futureDiscountAmount;
-
-    results.push({
-      method:
-        cashbackAmount > 0
-          ? "네이버멤버십 + 네이버페이 + 주말 캐시백"
-          : "네이버멤버십 + 네이버페이",
-      description:
-        cashbackAmount > 0
-          ? "10% 즉시할인 + 10% 즉시적립 + 500원 캐시백"
-          : "10% 즉시할인 + 10% 즉시적립",
-      originalAmount: amount,
-      instantDiscountAmount: discountAmount,
-      futureDiscountAmount: futureDiscountAmount,
-      totalBenefitAmount: totalBenefitAmount,
-      finalAmount: amountAfterDiscount, // 즉시할인만 최종금액에서 차감, 캐시백은 미래 혜택
-      perceivedAmount: amount - totalBenefitAmount,
-      discountRate: totalBenefitAmount / amount,
-      rank: 1,
-      note:
-        cashbackAmount > 0
-          ? "POP로고 상품 한정, 적립은 1일 최대 5,000원, 주말 캐시백은 사전 신청 필수"
-          : "POP로고 상품 한정, 적립은 1일 최대 5,000원",
-    });
   }
 
-  // 통신사 멤버십 KT/LG(U+) + 할인카드 5%
+  // 네이버 멤버십 + 네이버페이
   if (
-    (filter.carrier === "kt" || filter.carrier === "lg") &&
+    filter.useNaverMembership &&
+    filter.useNaverPay &&
+    discountRules.naverMembership.enabled
+  ) {
+    const naverMembership = discountRules.naverMembership;
+
+    // POP 로고 제한 확인
+    const isPOPRestricted = naverMembership.productRestriction === "popLogo";
+
+    if (!isPOPRestricted || (isPOPRestricted && hasPOPLogo)) {
+      const discountRate = naverMembership.instantDiscountRate;
+      const pointRate = naverMembership.pointRate;
+      const discountAmount = amount * discountRate;
+      const pointAmount = amount * pointRate;
+      const maxPointAmount = Math.min(
+        pointAmount,
+        naverMembership.maxPointAmount
+      );
+
+      // 즉시 할인 후 금액 계산
+      const amountAfterDiscount = amount - discountAmount;
+
+      // 할인 후 금액이 최소 금액 이상이면서 주말인 경우 캐시백 적용
+      let cashbackAmount = 0;
+      if (
+        isWeekendNow &&
+        discountRules.naverPayWeekend.enabled &&
+        amountAfterDiscount >= discountRules.naverPayWeekend.minAmount
+      ) {
+        cashbackAmount = discountRules.naverPayWeekend.cashbackAmount;
+      }
+
+      const futureDiscountAmount = maxPointAmount + cashbackAmount;
+      const totalBenefitAmount = discountAmount + futureDiscountAmount;
+
+      results.push({
+        method:
+          cashbackAmount > 0
+            ? "네이버멤버십 + 네이버페이 + 주말 캐시백"
+            : "네이버멤버십 + 네이버페이",
+        description:
+          cashbackAmount > 0
+            ? `${discountRate * 100}% 즉시할인 + ${
+                pointRate * 100
+              }% 즉시적립 + ${cashbackAmount}원 캐시백`
+            : `${discountRate * 100}% 즉시할인 + ${pointRate * 100}% 즉시적립`,
+        originalAmount: amount,
+        instantDiscountAmount: discountAmount,
+        futureDiscountAmount: futureDiscountAmount,
+        totalBenefitAmount: totalBenefitAmount,
+        finalAmount: amountAfterDiscount, // 즉시할인만 최종금액에서 차감, 캐시백은 미래 혜택
+        perceivedAmount: amount - totalBenefitAmount,
+        discountRate: totalBenefitAmount / amount,
+        rank: 1,
+        note:
+          cashbackAmount > 0
+            ? `${isPOPRestricted ? "POP로고 상품 한정, " : ""}적립은 1일 최대 ${
+                naverMembership.maxPointAmount
+              }원, 주말 캐시백은 사전 신청 필수`
+            : `${isPOPRestricted ? "POP로고 상품 한정, " : ""}적립은 1일 최대 ${
+                naverMembership.maxPointAmount
+              }원`,
+      });
+    }
+  }
+
+  // 통신사 멤버십 + 할인카드 조합
+  if (
+    filter.carrier !== "none" &&
     filter.useCardDiscount &&
-    filter.customCardDiscountRate &&
-    filter.customCardDiscountRate >= 5 &&
+    filter.customCardDiscountRate !== undefined &&
     amount >= MIN_PURCHASE_AMOUNTS.CARRIER
   ) {
-    // KT, LG(U+) 멤버십 모두 1,000원당 100원 할인
-    const carrierDiscountAmount = Math.floor(amount / 1000) * 100; // 1,000원당 100원 할인 (천원 단위 절사)
+    // 선택한 통신사 멤버십 정보 가져오기
+    const carrierInfo =
+      filter.carrier === "skt"
+        ? discountRules.carrierMembership.skt
+        : filter.carrier === "kt"
+        ? discountRules.carrierMembership.kt
+        : discountRules.carrierMembership.lg;
 
-    const remainingAmount = amount - carrierDiscountAmount;
-    const cardDiscountRate = filter.customCardDiscountRate / 100; // 5% 카드 할인
-    const cardDiscountAmount = remainingAmount * cardDiscountRate;
-    const totalDiscountAmount = carrierDiscountAmount + cardDiscountAmount;
+    // 타입 안전성을 위한 체크
+    if (
+      carrierInfo &&
+      typeof carrierInfo === "object" &&
+      "enabled" in carrierInfo &&
+      carrierInfo.enabled &&
+      "discountRate" in carrierInfo
+    ) {
+      // carrierInfo를 적절한 타입으로 단언
+      const typedCarrierInfo = carrierInfo as CarrierMembershipInfo;
 
-    results.push({
-      method: `${filter.carrier === "kt" ? "KT" : "U+"} 멤버십 + ${
-        filter.customCardDiscountRate
-      }% 할인카드`,
-      description: `1,000원당 100원 할인 후 ${filter.customCardDiscountRate}% 추가 할인`,
-      originalAmount: amount,
-      instantDiscountAmount: carrierDiscountAmount,
-      futureDiscountAmount: cardDiscountAmount,
-      totalBenefitAmount: totalDiscountAmount,
-      finalAmount: amount - totalDiscountAmount,
-      perceivedAmount: amount - totalDiscountAmount,
-      discountRate: totalDiscountAmount / amount,
-      rank: results.length + 1,
-      note: "1일 1회 사용 가능, 행사상품/담배/주류 제외",
-    });
+      // 할인율 적용 (1,000원당 X원 할인)
+      const carrierDiscountAmount =
+        Math.floor(amount / 1000) * (typedCarrierInfo.discountRate * 1000);
+      const remainingAmount = amount - carrierDiscountAmount;
+
+      const cardDiscountRate = filter.customCardDiscountRate / 100;
+      const cardDiscountAmount = remainingAmount * cardDiscountRate;
+      const totalDiscountAmount = carrierDiscountAmount + cardDiscountAmount;
+
+      // restrictions 속성 안전하게 접근
+      const restrictions = typedCarrierInfo.restrictions
+        ? typedCarrierInfo.restrictions.join(", ")
+        : "1일 1회 사용 가능, 행사상품/담배/주류 제외";
+
+      results.push({
+        method: `${
+          filter.carrier === "skt" ? "T" : filter.carrier === "kt" ? "KT" : "U+"
+        } 멤버십 + ${filter.customCardDiscountRate}% 할인카드`,
+        description: `1,000원당 ${
+          typedCarrierInfo.discountRate * 1000
+        }원 할인 후 ${filter.customCardDiscountRate}% 추가 할인`,
+        originalAmount: amount,
+        instantDiscountAmount: carrierDiscountAmount,
+        futureDiscountAmount: cardDiscountAmount,
+        totalBenefitAmount: totalDiscountAmount,
+        finalAmount: amount - totalDiscountAmount,
+        perceivedAmount: amount - totalDiscountAmount,
+        discountRate: totalDiscountAmount / amount,
+        rank: results.length + 1,
+        note: restrictions,
+      });
+    }
   }
 
-  // 통신사 멤버십 KT/LG(U+) + 할인카드 2%
-  if (
-    (filter.carrier === "kt" || filter.carrier === "lg") &&
-    filter.useCardDiscount &&
-    filter.customCardDiscountRate &&
-    filter.customCardDiscountRate < 5 &&
-    amount >= MIN_PURCHASE_AMOUNTS.CARRIER
-  ) {
-    // KT, LG(U+) 멤버십 모두 1,000원당 100원 할인
-    const carrierDiscountAmount = Math.floor(amount / 1000) * 100; // 1,000원당 100원 할인 (천원 단위 절사)
+  // 통신사 멤버십 단독 사용
+  if (filter.carrier !== "none" && amount >= MIN_PURCHASE_AMOUNTS.CARRIER) {
+    // 선택한 통신사 멤버십 정보 가져오기
+    const carrierInfo =
+      filter.carrier === "skt"
+        ? discountRules.carrierMembership.skt
+        : filter.carrier === "kt"
+        ? discountRules.carrierMembership.kt
+        : discountRules.carrierMembership.lg;
 
-    const remainingAmount = amount - carrierDiscountAmount;
-    const cardDiscountRate = filter.customCardDiscountRate / 100;
-    const cardDiscountAmount = remainingAmount * cardDiscountRate;
-    const totalDiscountAmount = carrierDiscountAmount + cardDiscountAmount;
+    // 타입 안전성을 위한 체크
+    if (
+      carrierInfo &&
+      typeof carrierInfo === "object" &&
+      "enabled" in carrierInfo &&
+      carrierInfo.enabled &&
+      "discountRate" in carrierInfo
+    ) {
+      // carrierInfo를 적절한 타입으로 단언
+      const typedCarrierInfo = carrierInfo as CarrierMembershipInfo;
 
-    results.push({
-      method: `${filter.carrier === "kt" ? "KT" : "U+"} 멤버십 + ${
-        filter.customCardDiscountRate
-      }% 할인카드`,
-      description: `1,000원당 100원 할인 후 ${filter.customCardDiscountRate}% 추가 할인`,
-      originalAmount: amount,
-      instantDiscountAmount: carrierDiscountAmount,
-      futureDiscountAmount: cardDiscountAmount,
-      totalBenefitAmount: totalDiscountAmount,
-      finalAmount: amount - totalDiscountAmount,
-      perceivedAmount: amount - totalDiscountAmount,
-      discountRate: totalDiscountAmount / amount,
-      rank: results.length + 1,
-      note: "1일 1회 사용 가능, 행사상품/담배/주류 제외",
-    });
-  }
+      // KT, LG(U+) 멤버십 모두 1,000원당 100원 할인
+      const carrierDiscountAmount =
+        Math.floor(amount / 1000) * (typedCarrierInfo.discountRate * 1000);
 
-  // 통신사 멤버십 KT/LG(U+) 단독 사용
-  if (
-    (filter.carrier === "kt" || filter.carrier === "lg") &&
-    amount >= MIN_PURCHASE_AMOUNTS.CARRIER
-  ) {
-    // KT, LG(U+) 멤버십 모두 1,000원당 100원 할인
-    const carrierDiscountAmount = Math.floor(amount / 1000) * 100; // 1,000원당 100원 할인 (천원 단위 절사)
+      // restrictions 속성 안전하게 접근
+      const restrictions = typedCarrierInfo.restrictions
+        ? typedCarrierInfo.restrictions.join(", ")
+        : "1일 1회 사용 가능, 행사상품/담배/주류 제외";
 
-    results.push({
-      method: `${filter.carrier === "kt" ? "KT" : "U+"} 멤버십`,
-      description: "1,000원당 100원 할인",
-      originalAmount: amount,
-      instantDiscountAmount: carrierDiscountAmount,
-      futureDiscountAmount: 0,
-      totalBenefitAmount: carrierDiscountAmount,
-      finalAmount: amount - carrierDiscountAmount,
-      perceivedAmount: amount - carrierDiscountAmount,
-      discountRate: carrierDiscountAmount / amount,
-      rank: results.length + 1,
-      note: "1일 1회 사용 가능, 행사상품/담배/주류 제외",
-    });
+      results.push({
+        method: `${
+          filter.carrier === "skt" ? "T" : filter.carrier === "kt" ? "KT" : "U+"
+        } 멤버십`,
+        description: `1,000원당 ${typedCarrierInfo.discountRate * 1000}원 할인`,
+        originalAmount: amount,
+        instantDiscountAmount: carrierDiscountAmount,
+        futureDiscountAmount: 0,
+        totalBenefitAmount: carrierDiscountAmount,
+        finalAmount: amount - carrierDiscountAmount,
+        perceivedAmount: amount - carrierDiscountAmount,
+        discountRate: carrierDiscountAmount / amount,
+        rank: results.length + 1,
+        note: restrictions,
+      });
+    }
   }
 
   // 할인카드 단독 사용
