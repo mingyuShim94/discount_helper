@@ -189,3 +189,24 @@ const isMobile = useMediaQuery("(max-width: 768px)");
 // isMobile 값에 따라 다른 UI 렌더링
 return isMobile ? <MobileUI /> : <DesktopUI />;
 ```
+
+### 레이아웃 및 설정
+
+#### `app/layout.tsx`
+
+Next.js 애플리케이션의 루트 레이아웃을 정의하는 파일입니다.
+
+주요 기능:
+
+- 전역 폰트 설정 (Geist Sans, Geist Mono)
+- SEO 최적화를 위한 메타데이터 설정:
+  - 타이틀 및 설명
+  - 키워드 목록
+  - OpenGraph 메타데이터
+  - Twitter 카드 메타데이터
+  - 파비콘 및 앱 아이콘
+  - 검색엔진 최적화 설정
+  - 모바일 최적화 뷰포트
+- Google Analytics 통합
+- 반응형 레이아웃 구조
+- 다국어 지원 (한국어)

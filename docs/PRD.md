@@ -198,6 +198,13 @@
 - 상태 관리: React Hooks
 - 할인 계산 로직: TypeScript 기반 계산 유틸리티
 - 모바일 앱(향후): Flutter
+- SEO 최적화:
+  - OpenGraph 메타데이터 (og:title, og:description, og:image 등)
+  - Twitter 카드 메타데이터
+  - 파비콘 및 앱 아이콘 (16x16, 32x32, 192x192, 512x512)
+  - 검색엔진 최적화 설정 (robots.txt, canonical URL 등)
+  - 모바일 최적화 뷰포트 설정
+  - 다국어 지원 (한국어)
 
 ### 개발 우선순위
 

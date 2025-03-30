@@ -70,19 +70,19 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: "https://discount-helper.vercel.app",
+    canonical: "https://discount-helper.pages.dev",
   },
   openGraph: {
     title: "할인도우미 - 편의점/카페 최적의 할인 방법 찾기",
     description:
       "편의점과 카페의 모든 할인 정보를 한눈에! 통신사 멤버십(SKT, KT, LG), 네이버페이, 카드사 할인 정보를 쉽게 확인하고 최적의 할인 방법을 찾아보세요.",
-    url: "https://discount-helper.vercel.app",
+    url: "https://discount-helper.pages.dev",
     siteName: "할인도우미",
     type: "website",
     locale: "ko_KR",
     images: [
       {
-        url: "/og-image.png",
+        url: "https://discount-helper.pages.dev/og-image.png",
         width: 1200,
         height: 630,
         alt: "할인도우미 - 편의점/카페 최적의 할인 방법 찾기",
@@ -94,7 +94,7 @@ export const metadata: Metadata = {
     title: "할인도우미 - 편의점/카페 최적의 할인 방법 찾기",
     description:
       "편의점과 카페의 모든 할인 정보를 한눈에! 통신사 멤버십(SKT, KT, LG), 네이버페이, 카드사 할인 정보를 쉽게 확인하고 최적의 할인 방법을 찾아보세요.",
-    images: ["/og-image.png"],
+    images: ["https://discount-helper.pages.dev/og-image.png"],
   },
   manifest: "/site.webmanifest",
   icons: {
