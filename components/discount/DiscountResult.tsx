@@ -499,11 +499,35 @@ export function DiscountResult({
                   <TabsContent value="optimal" className="mt-0">
                     {bestDiscount && (
                       <div className="bg-primary/20 border-2 border-primary rounded-lg p-4 mb-4 shadow-md">
-                        <div className="flex items-center text-primary mb-3">
+                        <div className="flex items-center text-primary mb-4">
                           <Crown className="h-6 w-6 mr-2 flex-shrink-0" />
-                          <span className="font-bold text-lg break-words">
-                            최적의 할인 방법 요약
-                          </span>
+                          <div className="space-y-2">
+                            <div className="font-bold text-xl break-words">
+                              {bestDiscount.method}
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              {bestDiscount.instantDiscountAmount > 0 && (
+                                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 border border-green-200">
+                                  즉시할인
+                                </span>
+                              )}
+                              {bestDiscount.method.includes("네이버멤버십") && (
+                                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                                  포인트적립
+                                </span>
+                              )}
+                              {bestDiscount.method.includes("캐시백") && (
+                                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
+                                  캐시백
+                                </span>
+                              )}
+                              {bestDiscount.method.includes("할인카드") && (
+                                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800 border border-purple-200">
+                                  카드할인
+                                </span>
+                              )}
+                            </div>
+                          </div>
                         </div>
 
                         {/* 총 혜택을 가장 눈에 띄게 표시 */}
@@ -606,38 +630,38 @@ export function DiscountResult({
                                 toggleCardExpansion(discount.method)
                               }
                             >
-                              <div className="flex justify-between items-center">
-                                <div>
+                              <div className="flex justify-between items-start">
+                                <div className="space-y-2">
                                   <span
                                     className={
                                       bestDiscount &&
                                       discount.method === bestDiscount.method
-                                        ? "font-bold text-primary whitespace-normal block"
-                                        : "whitespace-normal block"
+                                        ? "font-bold text-primary text-lg whitespace-normal block"
+                                        : "text-lg whitespace-normal block"
                                     }
                                   >
                                     {discount.method}
                                   </span>
-                                  <div className="flex flex-wrap gap-1 mt-1">
+                                  <div className="flex flex-wrap gap-2">
                                     {discount.instantDiscountAmount > 0 && (
-                                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 border border-green-200">
                                         즉시할인
                                       </span>
                                     )}
                                     {discount.method.includes(
                                       "네이버멤버십"
                                     ) && (
-                                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 border border-blue-200">
                                         포인트적립
                                       </span>
                                     )}
                                     {discount.method.includes("캐시백") && (
-                                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
                                         캐시백
                                       </span>
                                     )}
                                     {discount.method.includes("할인카드") && (
-                                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
+                                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800 border border-purple-200">
                                         카드할인
                                       </span>
                                     )}
@@ -1017,33 +1041,56 @@ export function DiscountResult({
                   </TabsContent>
                 </Tabs>
               ) : (
-                // Desktop view - 기존 코드 유지
+                // 데스크톱 화면: 기존 레이아웃 개선
                 <>
                   {/* 최적 할인 방법 요약 표시 (데스크톱) */}
                   {bestDiscount && (
-                    <div className="bg-primary/10 border border-primary rounded-lg p-4 mb-4 flex">
+                    <div className="bg-primary/10 border border-primary rounded-lg p-6 mb-4 flex">
                       <div className="flex items-start w-full">
-                        <Crown className="h-6 w-6 text-primary mr-3 mt-1" />
+                        <Crown className="h-8 w-8 text-primary mr-4 mt-1" />
                         <div className="w-full">
-                          <h3 className="font-bold text-primary mb-3 break-words">
-                            최적의 할인 방법: {bestDiscount.method}
-                          </h3>
-
-                          {/* 총 혜택을 가장 눈에 띄게 표시 */}
+                          <div className="space-y-3 mb-4">
+                            <h3 className="font-bold text-primary text-2xl break-words">
+                              {bestDiscount.method}
+                            </h3>
+                            <div className="flex flex-wrap gap-2">
+                              {bestDiscount.instantDiscountAmount > 0 && (
+                                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 border border-green-200">
+                                  즉시할인
+                                </span>
+                              )}
+                              {bestDiscount.method.includes("네이버멤버십") && (
+                                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                                  포인트적립
+                                </span>
+                              )}
+                              {bestDiscount.method.includes("캐시백") && (
+                                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
+                                  캐시백
+                                </span>
+                              )}
+                              {bestDiscount.method.includes("할인카드") && (
+                                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800 border border-purple-200">
+                                  카드할인
+                                </span>
+                              )}
+                            </div>
+                          </div>
                           <div className="bg-purple-50 border-2 border-purple-200 p-3 rounded-md text-center mb-3">
-                            <div className="text-sm text-purple-700 mb-1 font-medium">
+                            <div className="text-xs text-purple-700 mb-1 font-medium">
                               총 할인 혜택
                             </div>
                             <div className="font-bold text-purple-700 text-2xl">
                               {bestDiscount.totalBenefitAmount.toLocaleString()}
                               원
-                              <span className="text-sm ml-2 text-purple-600">
-                                ({(bestDiscount.discountRate * 100).toFixed(1)}
-                                %)
+                            </div>
+                            <div className="text-xs text-purple-700 mt-1">
+                              할인율{" "}
+                              <span className="font-semibold">
+                                {(bestDiscount.discountRate * 100).toFixed(1)}%
                               </span>
                             </div>
                           </div>
-
                           <div className="grid grid-cols-4 gap-4 mb-3">
                             <div className="bg-red-50 border-2 border-red-200 p-3 rounded-md text-center">
                               <div className="text-xs text-red-700 mb-1 font-medium">
@@ -1087,7 +1134,6 @@ export function DiscountResult({
                               </div>
                             </div>
                           </div>
-
                           {/* 할인액 비교 그래프 추가 */}
                           {discountResults.length > 1 && (
                             <div className="mt-4 bg-white p-3 rounded border">
@@ -1154,7 +1200,7 @@ export function DiscountResult({
                     </div>
                   )}
 
-                  {/* 기존 테이블 */}
+                  {/* 기존 테이블 개선 */}
                   <div className="rounded-md border">
                     <Table>
                       <TableHeader>
@@ -1246,7 +1292,6 @@ export function DiscountResult({
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {/* 할인액 기준으로 정렬된 결제 방법 목록을 표시 */}
                         {discountResults
                           .sort(
                             (a, b) =>
@@ -1278,7 +1323,7 @@ export function DiscountResult({
                                 </div>
                               </TableCell>
                               <TableCell className="font-medium">
-                                <div>
+                                <div className="space-y-2">
                                   {bestDiscount &&
                                     discount.method === bestDiscount.method && (
                                       <div className="flex items-center mb-1 text-primary">
@@ -1292,41 +1337,38 @@ export function DiscountResult({
                                     className={
                                       bestDiscount &&
                                       discount.method === bestDiscount.method
-                                        ? "font-bold text-primary whitespace-normal block"
-                                        : "whitespace-normal block"
+                                        ? "font-bold text-primary text-lg whitespace-normal block"
+                                        : "text-lg whitespace-normal block"
                                     }
                                   >
                                     {discount.method}
                                   </span>
-                                  <div className="flex flex-wrap gap-1 mt-1">
+                                  <div className="flex flex-wrap gap-2">
                                     {discount.instantDiscountAmount > 0 && (
-                                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 border border-green-200">
                                         즉시할인
                                       </span>
                                     )}
                                     {discount.method.includes(
                                       "네이버멤버십"
                                     ) && (
-                                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 border border-blue-200">
                                         포인트적립
                                       </span>
                                     )}
                                     {discount.method.includes("캐시백") && (
-                                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
                                         캐시백
                                       </span>
                                     )}
                                     {discount.method.includes("할인카드") && (
-                                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
+                                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800 border border-purple-200">
                                         카드할인
                                       </span>
                                     )}
                                   </div>
                                   {discount.note && (
-                                    <p
-                                      className="text-xs text-gray-500 mt-1 break-words max-w-[200px] line-clamp-2 hover:line-clamp-none"
-                                      title={discount.note}
-                                    >
+                                    <p className="text-xs text-gray-500 mt-1 break-words max-w-[200px] line-clamp-2 hover:line-clamp-none">
                                       {discount.note}
                                     </p>
                                   )}

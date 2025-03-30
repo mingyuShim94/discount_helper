@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
   CardContent,
@@ -17,6 +16,7 @@ import {
   IDiscountFilter,
   DEFAULT_DISCOUNT_FILTER,
 } from "@/types/discountFilter";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 export type { IDiscountFilter } from "@/types/discountFilter";
 
@@ -29,6 +29,7 @@ export function DiscountFilter({ value, onChange }: DiscountFilterProps) {
   const [filter, setFilter] = useState<IDiscountFilter>(
     value || DEFAULT_DISCOUNT_FILTER
   );
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   const handleFilterChange = (newFilter: Partial<IDiscountFilter>) => {
     const updatedFilter = { ...filter, ...newFilter };
@@ -49,6 +50,17 @@ export function DiscountFilter({ value, onChange }: DiscountFilterProps) {
     }
   };
 
+  const containerClass = isMobile ? "space-y-6" : "grid grid-cols-2 gap-6";
+  const sectionClass = isMobile ? "space-y-4" : "space-y-4";
+  const optionClass = isMobile
+    ? "bg-secondary/20 rounded-lg p-3"
+    : "bg-secondary/10 hover:bg-secondary/20 transition-colors rounded-lg p-3";
+
+  // 통신사 멤버십 RadioGroup의 grid 레이아웃을 조건부로 설정
+  const carrierGridClass = isMobile
+    ? "grid grid-cols-2 gap-2"
+    : "grid grid-cols-1 gap-2";
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -58,67 +70,77 @@ export function DiscountFilter({ value, onChange }: DiscountFilterProps) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="membership" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="membership">멤버십</TabsTrigger>
-            <TabsTrigger value="payment">결제 방법</TabsTrigger>
-          </TabsList>
+        <div className={containerClass}>
+          {/* 멤버십 섹션 */}
+          <div className={sectionClass}>
+            <h3 className="font-medium text-base">멤버십</h3>
 
-          {/* 멤버십 선택 탭 */}
-          <TabsContent value="membership">
-            <div className="space-y-6">
-              {/* 통신사 멤버십 */}
+            {/* 통신사 멤버십 */}
+            <div className="space-y-2">
+              <Label className="text-sm text-muted-foreground">
+                통신사 멤버십
+              </Label>
+              <RadioGroup
+                value={filter.carrier}
+                onValueChange={(value) =>
+                  handleFilterChange({
+                    carrier: value as "none" | "skt" | "kt" | "lg",
+                  })
+                }
+                className={carrierGridClass}
+              >
+                <div className={`flex items-center space-x-2 ${optionClass}`}>
+                  <RadioGroupItem value="none" id="none" />
+                  <Label htmlFor="none">없음</Label>
+                </div>
+                <div className={`flex items-center space-x-2 ${optionClass}`}>
+                  <RadioGroupItem value="skt" id="skt" />
+                  <Label htmlFor="skt">SKT (T멤버십)</Label>
+                </div>
+                <div className={`flex items-center space-x-2 ${optionClass}`}>
+                  <RadioGroupItem value="kt" id="kt" />
+                  <Label htmlFor="kt">KT (KT멤버십)</Label>
+                </div>
+                <div className={`flex items-center space-x-2 ${optionClass}`}>
+                  <RadioGroupItem value="lg" id="lg" />
+                  <Label htmlFor="lg">LG (U+멤버십)</Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            {/* 기타 멤버십 */}
+            <div className="space-y-2">
+              <Label className="text-sm text-muted-foreground">
+                기타 멤버십
+              </Label>
               <div className="space-y-2">
-                <Label className="text-base font-medium">통신사 멤버십</Label>
-                <RadioGroup
-                  value={filter.carrier}
-                  onValueChange={(value) =>
-                    handleFilterChange({
-                      carrier: value as "none" | "skt" | "kt" | "lg",
-                    })
-                  }
-                  className="grid grid-cols-2 gap-2"
-                >
+                <div className={optionClass}>
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="none" id="none" />
-                    <Label htmlFor="none">없음</Label>
+                    <Checkbox
+                      id="naver-membership"
+                      checked={filter.useNaverMembership}
+                      onCheckedChange={(checked: boolean | "indeterminate") =>
+                        handleFilterChange({
+                          useNaverMembership: checked === true,
+                        })
+                      }
+                    />
+                    <Label htmlFor="naver-membership">네이버 멤버십</Label>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="skt" id="skt" />
-                    <Label htmlFor="skt">SKT (T멤버십)</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="kt" id="kt" />
-                    <Label htmlFor="kt">KT (KT멤버십)</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="lg" id="lg" />
-                    <Label htmlFor="lg">LG (U+멤버십)</Label>
-                  </div>
-                </RadioGroup>
-              </div>
-
-              {/* 네이버 멤버십 */}
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="naver-membership"
-                  checked={filter.useNaverMembership}
-                  onCheckedChange={(checked: boolean | "indeterminate") =>
-                    handleFilterChange({ useNaverMembership: checked === true })
-                  }
-                />
-                <Label htmlFor="naver-membership">네이버 멤버십</Label>
+                </div>
               </div>
             </div>
-          </TabsContent>
+          </div>
 
-          {/* 결제 방법 선택 탭 */}
-          <TabsContent value="payment">
-            <div className="space-y-6">
-              {/* 간편결제 */}
-              <div className="space-y-2">
-                <Label className="text-base font-medium">간편결제</Label>
-                <div className="grid grid-cols-1 gap-2">
+          {/* 결제 방법 섹션 */}
+          <div className={sectionClass}>
+            <h3 className="font-medium text-base">결제 방법</h3>
+
+            {/* 간편결제 */}
+            <div className="space-y-2">
+              <Label className="text-sm text-muted-foreground">간편결제</Label>
+              <div className="grid grid-cols-1 gap-2">
+                <div className={optionClass}>
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="naver-pay"
@@ -129,6 +151,8 @@ export function DiscountFilter({ value, onChange }: DiscountFilterProps) {
                     />
                     <Label htmlFor="naver-pay">네이버페이</Label>
                   </div>
+                </div>
+                <div className={optionClass}>
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="kakao-pay"
@@ -139,6 +163,8 @@ export function DiscountFilter({ value, onChange }: DiscountFilterProps) {
                     />
                     <Label htmlFor="kakao-pay">카카오페이</Label>
                   </div>
+                </div>
+                <div className={optionClass}>
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="toss-pay"
@@ -151,9 +177,11 @@ export function DiscountFilter({ value, onChange }: DiscountFilterProps) {
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* 카드 할인 */}
-              <div className="space-y-3">
+            {/* 카드 할인 */}
+            <div className="space-y-3">
+              <div className={optionClass}>
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="card-discount"
@@ -169,25 +197,25 @@ export function DiscountFilter({ value, onChange }: DiscountFilterProps) {
                   />
                   <Label htmlFor="card-discount">할인 카드 사용</Label>
                 </div>
-
-                {filter.useCardDiscount && (
-                  <div className="pl-6 space-y-1">
-                    <Label htmlFor="discount-rate">할인률 (%)</Label>
-                    <Input
-                      id="discount-rate"
-                      type="text"
-                      min={0}
-                      max={100}
-                      value={filter.customCardDiscountRate?.toString() || ""}
-                      onChange={handleCustomCardDiscountRateChange}
-                      className="w-24"
-                    />
-                  </div>
-                )}
               </div>
+
+              {filter.useCardDiscount && (
+                <div className="pl-6 space-y-1">
+                  <Label htmlFor="discount-rate">할인률 (%)</Label>
+                  <Input
+                    id="discount-rate"
+                    type="text"
+                    min={0}
+                    max={100}
+                    value={filter.customCardDiscountRate?.toString() || ""}
+                    onChange={handleCustomCardDiscountRateChange}
+                    className="w-24"
+                  />
+                </div>
+              )}
             </div>
-          </TabsContent>
-        </Tabs>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
