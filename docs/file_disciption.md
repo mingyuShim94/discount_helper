@@ -202,11 +202,16 @@ Next.js 애플리케이션의 루트 레이아웃을 정의하는 파일입니�
 - SEO 최적화를 위한 메타데이터 설정:
   - 타이틀 및 설명
   - 키워드 목록
-  - OpenGraph 메타데이터
+  - OpenGraph 메타데이터 (동적 URL 처리)
   - Twitter 카드 메타데이터
   - 파비콘 및 앱 아이콘
   - 검색엔진 최적화 설정
   - 모바일 최적화 뷰포트
+- 환경변수 기반 동적 URL 설정:
+  - `NEXT_PUBLIC_BASE_URL`: 배포 환경에 따른 기본 URL 설정
+  - 개발 환경: http://localhost:3000
+  - 프로덕션 환경: https://discount-helper.pages.dev
+  - OpenGraph 이미지, canonical URL 등에 활용
 - Google Analytics 통합
 - 반응형 레이아웃 구조
 - 다국어 지원 (한국어)

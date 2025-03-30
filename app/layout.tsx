@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const BASE_URL =
+  process.env.NEXT_PUBLIC_BASE_URL || "https://discount-helper.pages.dev";
+
 export const metadata: Metadata = {
   title: "할인도우미 - 편의점/카페 최적의 할인 방법 찾기",
   description:
@@ -70,19 +73,19 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: "https://discount-helper.pages.dev",
+    canonical: BASE_URL,
   },
   openGraph: {
     title: "할인도우미 - 편의점/카페 최적의 할인 방법 찾기",
     description:
       "편의점과 카페의 모든 할인 정보를 한눈에! 통신사 멤버십(SKT, KT, LG), 네이버페이, 카드사 할인 정보를 쉽게 확인하고 최적의 할인 방법을 찾아보세요.",
-    url: "https://discount-helper.pages.dev",
+    url: BASE_URL,
     siteName: "할인도우미",
     type: "website",
     locale: "ko_KR",
     images: [
       {
-        url: "https://discount-helper.pages.dev/og-image.png",
+        url: `${BASE_URL}/og-image.png`,
         width: 1200,
         height: 630,
         alt: "할인도우미 - 편의점/카페 최적의 할인 방법 찾기",
@@ -94,7 +97,7 @@ export const metadata: Metadata = {
     title: "할인도우미 - 편의점/카페 최적의 할인 방법 찾기",
     description:
       "편의점과 카페의 모든 할인 정보를 한눈에! 통신사 멤버십(SKT, KT, LG), 네이버페이, 카드사 할인 정보를 쉽게 확인하고 최적의 할인 방법을 찾아보세요.",
-    images: ["https://discount-helper.pages.dev/og-image.png"],
+    images: [`${BASE_URL}/og-image.png`],
   },
   manifest: "/site.webmanifest",
   icons: {
