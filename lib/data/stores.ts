@@ -6,7 +6,7 @@ export const STORES: IStore[] = [
     name: "GS25",
     category: StoreCategory.CONVENIENCE,
     thumbnail: "/images/stores/gs25.png",
-    isFavorite: true,
+    isFavorite: false,
   },
   {
     id: "2",

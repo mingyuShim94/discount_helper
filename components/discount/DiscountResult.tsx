@@ -36,6 +36,8 @@ import {
   ListFilter,
   Info,
   BadgePercent,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
@@ -116,6 +118,17 @@ export function DiscountResult({
   // #endregion
 
   // #region 이벤트 핸들러
+  /**
+   * 카드 토글 핸들러
+   * 카드의 드롭다운 상태를 전환합니다.
+   */
+  const handleToggleCard = (method: string) => {
+    setExpandedCards((prev) => ({
+      ...prev,
+      [method]: !prev[method],
+    }));
+  };
+
   /**
    * 직접 금액 입력 핸들러
    * 수학 표현식 계산 지원
@@ -488,7 +501,7 @@ export function DiscountResult({
                                 discount.method === bestDiscount.method
                                   ? "bg-primary/5"
                                   : ""
-                              } cursor-pointer`}
+                              }`}
                             >
                               <div className="flex justify-between items-start">
                                 <div className="space-y-2">
@@ -548,256 +561,359 @@ export function DiscountResult({
                                   </div>
                                 </div>
                               </div>
+
+                              {/* 혜택 자세히 보기 드롭다운 바 */}
+                              <div
+                                className="flex justify-between items-center mt-3 pt-2 border-t border-dashed cursor-pointer hover:bg-gray-50 rounded px-1"
+                                onClick={() =>
+                                  handleToggleCard(discount.method)
+                                }
+                              >
+                                <span className="text-sm text-gray-600 font-medium">
+                                  {expandedCards[discount.method]
+                                    ? "혜택 접기"
+                                    : "혜택 자세히 보기"}
+                                </span>
+                                {expandedCards[discount.method] ? (
+                                  <ChevronUp className="h-5 w-5 text-gray-500" />
+                                ) : (
+                                  <ChevronDown className="h-5 w-5 text-gray-500" />
+                                )}
+                              </div>
                             </CardHeader>
 
-                            <CardContent className="pt-0 pb-3">
-                              {expandedCards[discount.method] && (
-                                <>
-                                  {/* 할인 정보를 강조한 UI로 개선 */}
-                                  <div className="rounded-lg bg-gray-50 border p-3 mb-3">
-                                    <div className="grid grid-cols-1 gap-3 mb-3">
-                                      <div className="flex flex-col items-center justify-center p-4 bg-purple-50 rounded-md shadow-sm border-2 border-purple-200">
-                                        <span className="text-sm text-purple-700 mb-1 font-medium">
-                                          총 할인 혜택
+                            <CardContent className="pt-0 pb-3 overflow-hidden">
+                              <div
+                                className={`transition-all duration-300 ease-in-out ${
+                                  expandedCards[discount.method]
+                                    ? "max-h-[2000px] opacity-100"
+                                    : "max-h-0 opacity-0"
+                                }`}
+                              >
+                                {/* 할인 정보를 강조한 UI로 개선 */}
+                                <div className="rounded-lg bg-gray-50 border p-3 mb-3">
+                                  <div className="grid grid-cols-1 gap-3 mb-3">
+                                    <div className="flex flex-col items-center justify-center p-4 bg-purple-50 rounded-md shadow-sm border-2 border-purple-200">
+                                      <span className="text-sm text-purple-700 mb-1 font-medium">
+                                        총 할인 혜택
+                                      </span>
+                                      <span className="text-2xl font-bold text-purple-700">
+                                        {discount.totalBenefitAmount.toLocaleString()}
+                                        원
+                                      </span>
+                                      <span className="text-xs text-purple-600 mt-1">
+                                        원금의{" "}
+                                        <span className="font-semibold">
+                                          {(
+                                            discount.discountRate * 100
+                                          ).toFixed(1)}
+                                          %
                                         </span>
-                                        <span className="text-2xl font-bold text-purple-700">
-                                          {discount.totalBenefitAmount.toLocaleString()}
-                                          원
-                                        </span>
-                                        <span className="text-xs text-purple-600 mt-1">
-                                          원금의{" "}
-                                          <span className="font-semibold">
-                                            {(
-                                              discount.discountRate * 100
-                                            ).toFixed(1)}
-                                            %
-                                          </span>
-                                        </span>
-                                      </div>
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <div className="flex flex-col items-center justify-center p-3 bg-red-50 rounded-md shadow-sm border-2 border-red-200">
+                                      <span className="text-xs text-red-700 mb-1 font-medium">
+                                        체감가
+                                      </span>
+                                      <span className="text-lg font-bold text-red-600">
+                                        {discount.perceivedAmount.toLocaleString()}
+                                        원
+                                      </span>
+                                    </div>
+                                    <div className="flex flex-col items-center justify-center p-3 bg-green-50 rounded-md shadow-sm border-2 border-green-200">
+                                      <span className="text-xs text-green-700 mb-1 font-medium">
+                                        즉시 할인
+                                      </span>
+                                      <span className="text-lg font-bold text-green-600">
+                                        {discount.instantDiscountAmount > 0
+                                          ? `-${discount.instantDiscountAmount.toLocaleString()}원`
+                                          : "0원"}
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  <div className="grid grid-cols-2 gap-3 mt-3">
+                                    <div className="flex flex-col items-center justify-center p-3 bg-blue-50 rounded-md shadow-sm border-2 border-blue-200">
+                                      <span className="text-xs text-blue-700 mb-1 font-medium">
+                                        미래 혜택
+                                      </span>
+                                      <span className="text-lg font-bold text-blue-600">
+                                        {discount.futureDiscountAmount > 0
+                                          ? `-${discount.futureDiscountAmount.toLocaleString()}원`
+                                          : "0원"}
+                                      </span>
+                                    </div>
+                                    <div className="flex flex-col items-center justify-center p-3 bg-gray-50 rounded-md shadow-sm border">
+                                      <span className="text-xs text-gray-700 mb-1 font-medium">
+                                        실 결제액
+                                      </span>
+                                      <span className="text-lg font-bold">
+                                        {discount.finalAmount.toLocaleString()}
+                                        원
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* 상세 정보 - 펼쳐졌을 때만 표시됨 */}
+                                <div className="mt-3 pt-2 border-t border-dashed">
+                                  <div className="text-sm bg-gray-50 p-3 rounded-md mb-3">
+                                    <div className="flex items-center mb-2">
+                                      <Gift className="h-4 w-4 mr-1 text-primary" />
+                                      <span className="font-medium">
+                                        혜택 상세 정보
+                                      </span>
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-3">
-                                      <div className="flex flex-col items-center justify-center p-3 bg-red-50 rounded-md shadow-sm border-2 border-red-200">
-                                        <span className="text-xs text-red-700 mb-1 font-medium">
-                                          체감가
-                                        </span>
-                                        <span className="text-lg font-bold text-red-600">
-                                          {discount.perceivedAmount.toLocaleString()}
+                                    <div className="grid grid-cols-2 gap-2 mb-2">
+                                      <div>
+                                        <p className="text-xs text-gray-500">
+                                          원래 금액
+                                        </p>
+                                        <p className="font-medium">
+                                          {discount.originalAmount.toLocaleString()}
                                           원
-                                        </span>
+                                        </p>
                                       </div>
-                                      <div className="flex flex-col items-center justify-center p-3 bg-green-50 rounded-md shadow-sm border-2 border-green-200">
-                                        <span className="text-xs text-green-700 mb-1 font-medium">
+                                      <div>
+                                        <p className="text-xs text-gray-500">
+                                          총 혜택 금액
+                                        </p>
+                                        <p className="font-medium text-primary">
+                                          {discount.totalBenefitAmount.toLocaleString()}
+                                          원
+                                        </p>
+                                      </div>
+                                      <div>
+                                        <p className="text-xs text-gray-500">
                                           즉시 할인
-                                        </span>
-                                        <span className="text-lg font-bold text-green-600">
+                                        </p>
+                                        <p className="font-medium text-green-600">
                                           {discount.instantDiscountAmount > 0
                                             ? `-${discount.instantDiscountAmount.toLocaleString()}원`
                                             : "0원"}
-                                        </span>
+                                        </p>
                                       </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-3 mt-3">
-                                      <div className="flex flex-col items-center justify-center p-3 bg-blue-50 rounded-md shadow-sm border-2 border-blue-200">
-                                        <span className="text-xs text-blue-700 mb-1 font-medium">
+                                      <div>
+                                        <p className="text-xs text-gray-500">
                                           미래 혜택
-                                        </span>
-                                        <span className="text-lg font-bold text-blue-600">
+                                        </p>
+                                        <p className="font-medium text-blue-600">
                                           {discount.futureDiscountAmount > 0
                                             ? `-${discount.futureDiscountAmount.toLocaleString()}원`
                                             : "0원"}
-                                        </span>
-                                      </div>
-                                      <div className="flex flex-col items-center justify-center p-3 bg-gray-50 rounded-md shadow-sm border">
-                                        <span className="text-xs text-gray-700 mb-1 font-medium">
-                                          실 결제액
-                                        </span>
-                                        <span className="text-lg font-bold">
-                                          {discount.finalAmount.toLocaleString()}
-                                          원
-                                        </span>
+                                        </p>
                                       </div>
                                     </div>
                                   </div>
 
-                                  {/* 상세 정보 - 펼쳐졌을 때만 표시됨 */}
-                                  <div className="mt-3 pt-2 border-t border-dashed">
-                                    <div className="text-sm bg-gray-50 p-3 rounded-md mb-3">
-                                      <div className="flex items-center mb-2">
-                                        <Gift className="h-4 w-4 mr-1 text-primary" />
-                                        <span className="font-medium">
-                                          혜택 상세 정보
-                                        </span>
-                                      </div>
-
-                                      <div className="grid grid-cols-2 gap-2 mb-2">
-                                        <div>
-                                          <p className="text-xs text-gray-500">
-                                            원래 금액
-                                          </p>
-                                          <p className="font-medium">
-                                            {discount.originalAmount.toLocaleString()}
-                                            원
-                                          </p>
-                                        </div>
-                                        <div>
-                                          <p className="text-xs text-gray-500">
-                                            총 혜택 금액
-                                          </p>
-                                          <p className="font-medium text-primary">
-                                            {discount.totalBenefitAmount.toLocaleString()}
-                                            원
-                                          </p>
-                                        </div>
-                                        <div>
-                                          <p className="text-xs text-gray-500">
-                                            즉시 할인
-                                          </p>
-                                          <p className="font-medium text-green-600">
-                                            {discount.instantDiscountAmount > 0
-                                              ? `-${discount.instantDiscountAmount.toLocaleString()}원`
-                                              : "0원"}
-                                          </p>
-                                        </div>
-                                        <div>
-                                          <p className="text-xs text-gray-500">
-                                            미래 혜택
-                                          </p>
-                                          <p className="font-medium text-blue-600">
-                                            {discount.futureDiscountAmount > 0
-                                              ? `-${discount.futureDiscountAmount.toLocaleString()}원`
-                                              : "0원"}
-                                          </p>
-                                        </div>
-                                      </div>
+                                  <div className="text-sm mb-3">
+                                    <div className="flex items-center mb-2">
+                                      <Zap className="h-4 w-4 mr-1 text-green-600" />
+                                      <span className="font-medium">
+                                        할인 혜택 구성
+                                      </span>
                                     </div>
 
-                                    <div className="text-sm mb-3">
-                                      <div className="flex items-center mb-2">
-                                        <Zap className="h-4 w-4 mr-1 text-green-600" />
-                                        <span className="font-medium">
-                                          할인 혜택 구성
-                                        </span>
-                                      </div>
-
-                                      <ul className="space-y-2 mt-2 text-sm">
-                                        {/* 즉시 할인 섹션 */}
-                                        {discount.instantDiscountAmount > 0 && (
-                                          <li className="border rounded-md p-2 bg-green-50">
-                                            <div className="font-medium text-green-700 border-b border-green-200 pb-1 mb-2">
-                                              즉시 할인
-                                            </div>
-                                            <div className="flex">
-                                              <span className="text-green-600 font-medium mr-2 whitespace-nowrap">
-                                                할인 금액:
-                                              </span>
-                                              <span className="break-words">
-                                                {discount.method.includes(
-                                                  "네이버멤버십"
-                                                )
-                                                  ? "네이버멤버십 10% 할인"
-                                                  : discount.method.includes(
-                                                      "KT 멤버십"
-                                                    ) ||
-                                                    discount.method.includes(
-                                                      "U+ 멤버십"
-                                                    )
-                                                  ? "통신사 멤버십 1,000원당 100원 할인"
-                                                  : discount.method.includes(
-                                                      "T 멤버십"
-                                                    )
-                                                  ? "T 멤버십 할인"
-                                                  : "할인"}{" "}
-                                              </span>
-                                            </div>
-                                          </li>
-                                        )}
-
-                                        {/* 미래 혜택 섹션 */}
-                                        {(discount.method.includes(
-                                          "네이버멤버십"
-                                        ) ||
-                                          discount.method.includes(
-                                            "캐시백"
-                                          )) && (
-                                          <li className="border rounded-md p-2 bg-blue-50">
-                                            <div className="font-medium text-blue-700 border-b border-blue-200 pb-1 mb-2">
-                                              미래 혜택
-                                            </div>
-
+                                    <ul className="space-y-2 mt-2 text-sm">
+                                      {/* 즉시 할인 섹션 */}
+                                      {discount.instantDiscountAmount > 0 && (
+                                        <li className="border rounded-md p-2 bg-green-50">
+                                          <div className="font-medium text-green-700 border-b border-green-200 pb-1 mb-2">
+                                            즉시 할인
+                                          </div>
+                                          <div className="flex justify-between items-center mb-1">
+                                            <span className="text-green-600 font-medium whitespace-nowrap">
+                                              할인 금액:
+                                            </span>
+                                            <span className="font-bold text-green-700">
+                                              {discount.instantDiscountAmount.toLocaleString()}
+                                              원
+                                            </span>
+                                          </div>
+                                          <div className="text-xs text-gray-600 mt-1">
                                             {discount.method.includes(
                                               "네이버멤버십"
-                                            ) && (
-                                              <div className="flex mb-2">
-                                                <span className="text-blue-500 font-medium mr-2 whitespace-nowrap">
-                                                  포인트 적립:
-                                                </span>
-                                                <span className="break-words">
-                                                  네이버멤버십 10% 적립 (
-                                                  {Math.min(
-                                                    discount.originalAmount *
-                                                      0.1,
-                                                    5000
-                                                  ).toLocaleString()}
-                                                  원)
+                                            )
+                                              ? "네이버멤버십 10% 할인"
+                                              : discount.method.includes(
+                                                  "KT 멤버십"
+                                                ) ||
+                                                discount.method.includes(
+                                                  "U+ 멤버십"
+                                                )
+                                              ? "통신사 멤버십 1,000원당 100원 할인"
+                                              : discount.method.includes(
+                                                  "T 멤버십"
+                                                )
+                                              ? "T 멤버십 할인"
+                                              : discount.method.includes(
+                                                  "할인카드"
+                                                )
+                                              ? `${
+                                                  discount.method.match(
+                                                    /\d+%/
+                                                  )?.[0] || ""
+                                                } 카드 할인`
+                                              : "할인"}{" "}
+                                          </div>
+                                        </li>
+                                      )}
+
+                                      {/* 미래 혜택 섹션 */}
+                                      {(discount.method.includes(
+                                        "네이버멤버십"
+                                      ) ||
+                                        discount.method.includes("캐시백")) && (
+                                        <li className="border rounded-md p-2 bg-blue-50">
+                                          <div className="font-medium text-blue-700 border-b border-blue-200 pb-1 mb-2">
+                                            미래 혜택
+                                          </div>
+
+                                          {discount.method.includes(
+                                            "네이버멤버십"
+                                          ) && (
+                                            <div className="flex justify-between items-center mb-2">
+                                              <span className="text-blue-500 font-medium whitespace-nowrap">
+                                                포인트 적립:
+                                              </span>
+                                              <span className="font-bold text-blue-700">
+                                                {Math.min(
+                                                  discount.originalAmount * 0.1,
+                                                  5000
+                                                ).toLocaleString()}
+                                                원
+                                              </span>
+                                            </div>
+                                          )}
+
+                                          {discount.method.includes(
+                                            "캐시백"
+                                          ) && (
+                                            <div className="flex justify-between items-center">
+                                              <span className="text-yellow-600 font-medium whitespace-nowrap">
+                                                주말 캐시백:
+                                              </span>
+                                              <span className="font-bold text-yellow-700">
+                                                500원
+                                              </span>
+                                            </div>
+                                          )}
+
+                                          <div className="text-xs text-gray-600 mt-2 pb-1">
+                                            {discount.futureDiscountAmount >
+                                              0 && (
+                                              <div className="border-t border-blue-200 pt-1 mt-1">
+                                                <span>총 미래 혜택: </span>
+                                                <span className="font-semibold">
+                                                  {discount.futureDiscountAmount.toLocaleString()}
+                                                  원
                                                 </span>
                                               </div>
                                             )}
+                                          </div>
+                                        </li>
+                                      )}
 
-                                            {discount.method.includes(
-                                              "캐시백"
-                                            ) && (
-                                              <div className="flex">
-                                                <span className="text-yellow-600 font-medium mr-2 whitespace-nowrap">
-                                                  주말 캐시백:
-                                                </span>
-                                                <span className="break-words">
-                                                  네이버페이 주말 캐시백 (500원)
-                                                </span>
-                                              </div>
-                                            )}
-                                          </li>
-                                        )}
-
-                                        {discount.method.includes(
-                                          "할인카드"
-                                        ) && (
-                                          <li className="border rounded-md p-2 bg-purple-50">
-                                            <div className="font-medium text-purple-700 border-b border-purple-200 pb-1 mb-2">
-                                              카드 할인
-                                            </div>
-                                            <div className="flex">
-                                              <span className="text-purple-600 font-medium mr-2 whitespace-nowrap">
-                                                할인 금액:
-                                              </span>
-                                              <span className="break-words">
-                                                {discount.method.match(
-                                                  /\d+%/
-                                                )?.[0] || ""}{" "}
-                                                카드 할인
-                                              </span>
-                                            </div>
-                                          </li>
-                                        )}
-                                      </ul>
-
-                                      {discount.note && (
-                                        <div className="text-xs text-gray-500 mt-3 border-t pt-2">
-                                          <div className="flex">
-                                            <span className="font-medium whitespace-nowrap mr-1">
-                                              참고:
+                                      {discount.method.includes("할인카드") && (
+                                        <li className="border rounded-md p-2 bg-purple-50">
+                                          <div className="font-medium text-purple-700 border-b border-purple-200 pb-1 mb-2">
+                                            카드 할인
+                                          </div>
+                                          <div className="flex justify-between items-center">
+                                            <span className="text-purple-600 font-medium whitespace-nowrap">
+                                              할인 금액:
                                             </span>
-                                            <span className="break-words line-clamp-2 hover:line-clamp-none">
-                                              {discount.note}
+                                            <span className="font-bold text-purple-700">
+                                              {discount.instantDiscountAmount.toLocaleString()}
+                                              원
+                                            </span>
+                                          </div>
+                                          <div className="text-xs text-gray-600 mt-1">
+                                            {discount.method.match(
+                                              /\d+%/
+                                            )?.[0] || ""}{" "}
+                                            할인율 적용
+                                          </div>
+                                        </li>
+                                      )}
+                                    </ul>
+
+                                    {/* 할인 요약 정보 */}
+                                    <div className="mt-3 p-2 border rounded-md bg-gray-50">
+                                      <div className="font-medium border-b pb-1 mb-2 text-gray-700">
+                                        할인 적용 요약
+                                      </div>
+                                      <div className="space-y-1 text-sm">
+                                        <div className="flex justify-between">
+                                          <span className="text-gray-600">
+                                            원래 가격:
+                                          </span>
+                                          <span className="font-medium">
+                                            {discount.originalAmount.toLocaleString()}
+                                            원
+                                          </span>
+                                        </div>
+                                        <div className="flex justify-between text-green-600">
+                                          <span>즉시 할인:</span>
+                                          <span className="font-medium">
+                                            -
+                                            {discount.instantDiscountAmount.toLocaleString()}
+                                            원
+                                          </span>
+                                        </div>
+                                        <div className="flex justify-between text-blue-600">
+                                          <span>미래 혜택:</span>
+                                          <span className="font-medium">
+                                            -
+                                            {discount.futureDiscountAmount.toLocaleString()}
+                                            원
+                                          </span>
+                                        </div>
+                                        <div className="border-t border-dashed pt-1 mt-1">
+                                          <div className="flex justify-between font-medium">
+                                            <span>실 결제액:</span>
+                                            <span>
+                                              {discount.finalAmount.toLocaleString()}
+                                              원
+                                            </span>
+                                          </div>
+                                          <div className="flex justify-between text-purple-600 font-medium">
+                                            <span>총 혜택:</span>
+                                            <span>
+                                              {discount.totalBenefitAmount.toLocaleString()}
+                                              원
+                                            </span>
+                                          </div>
+                                          <div className="flex justify-between text-red-600 font-medium">
+                                            <span>체감가:</span>
+                                            <span>
+                                              {discount.perceivedAmount.toLocaleString()}
+                                              원
                                             </span>
                                           </div>
                                         </div>
-                                      )}
+                                      </div>
                                     </div>
+
+                                    {discount.note && (
+                                      <div className="text-xs text-gray-500 mt-3 border-t pt-2">
+                                        <div className="flex">
+                                          <span className="font-medium whitespace-nowrap mr-1">
+                                            참고:
+                                          </span>
+                                          <span className="break-words line-clamp-2 hover:line-clamp-none">
+                                            {discount.note}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    )}
                                   </div>
-                                </>
-                              )}
+                                </div>
+                              </div>
                             </CardContent>
                           </Card>
                         ))}
