@@ -20,6 +20,41 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## SEO 최적화
+
+이 프로젝트는 다음과 같은 SEO 최적화 기능을 포함하고 있습니다:
+
+### 도메인
+
+- 공식 도메인: [https://halindoumi.com](https://halindoumi.com)
+
+### Sitemap 자동 생성
+
+- `app/sitemap.ts` 파일을 통해 자동으로 sitemap.xml 생성
+- 정적 페이지와 동적 페이지(매장 목록)를 모두 포함
+- 상대적 중요도(priority)와 갱신 주기(changeFrequency) 설정
+- URL: `https://halindoumi.com/sitemap.xml`
+
+### Robots.txt
+
+- `app/robots.ts` 파일을 통해 자동으로 robots.txt 생성
+- 검색 엔진에 sitemap 위치 안내
+- API 엔드포인트 등 크롤링이 불필요한 경로 차단
+- URL: `https://halindoumi.com/robots.txt`
+
+### 메타데이터 최적화
+
+- `app/layout.tsx`에서 전역 메타데이터 설정
+- OpenGraph 및 Twitter 카드 메타데이터
+- 모바일 최적화 뷰포트 설정
+- 각 페이지별 동적 메타데이터 생성
+
+### 구글 서치콘솔
+
+- 구글 서치콘솔에 등록 완료
+- sitemap.xml 제출 완료
+- 추가 설정 정보는 `docs/SEO_GUIDE.md` 참조
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
