@@ -452,6 +452,90 @@ export function calculateOptimalDiscounts(
     });
   }
 
+  // 통신사 멤버십 + 카카오페이 굿딜 조합
+  if (
+    filter.carrier !== "none" &&
+    filter.useKakaoPay &&
+    discountRules.kakaoPay?.enabled &&
+    amount >= MIN_PURCHASE_AMOUNTS.CARRIER
+  ) {
+    // 선택한 통신사 멤버십 정보 가져오기
+    const carrierInfo =
+      filter.carrier === "skt"
+        ? discountRules.carrierMembership.skt
+        : filter.carrier === "kt"
+        ? discountRules.carrierMembership.kt
+        : discountRules.carrierMembership.lg;
+
+    // 타입 안전성을 위한 체크
+    if (
+      carrierInfo &&
+      typeof carrierInfo === "object" &&
+      "enabled" in carrierInfo &&
+      carrierInfo.enabled &&
+      "discountRate" in carrierInfo
+    ) {
+      // carrierInfo를 적절한 타입으로 단언
+      const typedCarrierInfo = carrierInfo as CarrierMembershipInfo;
+
+      // 통신사 멤버십 할인액 계산 (1,000원당 X원 할인)
+      const carrierDiscountAmount =
+        Math.floor(amount / 1000) * (typedCarrierInfo.discountRate * 1000);
+      const remainingAmount = amount - carrierDiscountAmount;
+
+      // 카카오페이 굿딜 할인 계산 (남은 금액에 대해)
+      const kakaoPayDiscountAmount =
+        remainingAmount * discountRules.kakaoPay.discountRate;
+      const totalDiscountAmount =
+        carrierDiscountAmount + kakaoPayDiscountAmount;
+
+      // restrictions 속성 안전하게 접근
+      const restrictions = typedCarrierInfo.restrictions
+        ? typedCarrierInfo.restrictions.join(", ")
+        : "1일 1회 사용 가능";
+
+      results.push({
+        method: `${
+          filter.carrier === "skt" ? "T" : filter.carrier === "kt" ? "KT" : "U+"
+        } 멤버십 + 카카오페이 굿딜`,
+        description: `1,000원당 ${
+          typedCarrierInfo.discountRate * 1000
+        }원 할인 후 ${discountRules.kakaoPay.discountRate * 100}% 추가 할인`,
+        originalAmount: amount,
+        instantDiscountAmount: totalDiscountAmount,
+        futureDiscountAmount: 0,
+        totalBenefitAmount: totalDiscountAmount,
+        finalAmount: amount - totalDiscountAmount,
+        perceivedAmount: amount - totalDiscountAmount,
+        discountRate: totalDiscountAmount / amount,
+        rank: results.length + 1,
+        note: `${restrictions}, 카카오페이 굿딜로 결제 시 추가 할인`,
+      });
+    }
+  }
+
+  // 카카오페이 굿딜 단독 사용
+  if (filter.useKakaoPay && discountRules.kakaoPay?.enabled) {
+    const kakaoPay = discountRules.kakaoPay;
+    const kakaoPayDiscountAmount = amount * kakaoPay.discountRate;
+
+    results.push({
+      method: "카카오페이 굿딜",
+      description: `${kakaoPay.discountRate * 100}% 할인`,
+      originalAmount: amount,
+      instantDiscountAmount: kakaoPayDiscountAmount,
+      futureDiscountAmount: 0,
+      totalBenefitAmount: kakaoPayDiscountAmount,
+      finalAmount: amount - kakaoPayDiscountAmount,
+      perceivedAmount: amount - kakaoPayDiscountAmount,
+      discountRate: kakaoPay.discountRate,
+      rank: results.length + 1,
+      note: kakaoPay.restrictions
+        ? kakaoPay.restrictions.join(", ")
+        : undefined,
+    });
+  }
+
   // 결과가 없는 경우 (아무 할인도 선택하지 않은 경우)
   if (results.length === 0) {
     results.push({

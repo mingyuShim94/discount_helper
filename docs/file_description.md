@@ -15,6 +15,10 @@
 - `isWeekend`: 현재 날짜가 금/토/일(주말)인지 확인하는 간단한 함수
   - 금요일(5), 토요일(6), 일요일(0)인 경우 true 반환
   - 네이버페이 주말 캐시백 이벤트 적용 여부 판단에 사용
+- `calculateOptimalDiscounts`: 입력 금액에 대한 최적 할인 조합 계산
+  - **매장 ID(storeId)를 입력받아 해당 매장의 할인 정책을 동적으로 적용**
+  - **lib/data/discountRules.ts에서 getDiscountRules 함수를 통해 매장별 할인 정책 가져옴**
+  - **통신사 멤버십 할인 적용 후 카카오페이 굿딜 할인 적용 (GS25 3%, 이마트24 3%, 메가커피 5%)**
 
 #### `components/discount/DiscountResult.tsx`
 

@@ -10,7 +10,9 @@ discount_helper/
   │   ├── store/              # 매장 관련 페이지
   │   │   └── [id]/           # 개별 매장 페이지 (동적 라우팅)
   │   ├── tips/               # 할인 팁 페이지
-  │   └── contact/            # 문의 페이지
+  │   ├── contact/            # 문의 페이지
+  │   ├── sitemap.ts          # 사이트맵 자동 생성
+  │   └── robots.ts           # 검색엔진 크롤링 규칙
   ├── components/             # 컴포넌트
   │   ├── discount/           # 할인 관련 컴포넌트
   │   ├── ui/                 # UI 공통 컴포넌트 (ShadCN)
@@ -43,6 +45,7 @@ discount_helper/
 - `calculateOptimalDiscounts`: 입력 금액에 대한 최적 할인 조합 계산
   - **매장 ID(storeId)를 입력받아 해당 매장의 할인 정책을 동적으로 적용**
   - **lib/data/discountRules.ts에서 getDiscountRules 함수를 통해 매장별 할인 정책 가져옴**
+  - **카카오페이 굿딜 3% 즉시할인 지원**
 - `calculateDiscount`: 단일 할인에 대한 할인액 계산
 - `calculateCombinedDiscount`: 중복 할인 계산 (멤버십 + 카드 등)
 - 할인 결과에 즉시 할인, 미래 할인(적립금, 캐시백), 체감가, 총 혜택 금액 구분 제공
@@ -147,6 +150,10 @@ discount_helper/
 - `IDiscountCalculationResult`: 할인 계산 결과 인터페이스
   - 할인 방법, 설명, 원래 금액
   - instantDiscountAmount: 즉시 할인 금액 (결제 시점에 차감)
+    - 통신사 멤버십 할인
+    - 네이버멤버십 즉시할인
+    - 카카오페이 굿딜 3% 즉시할인
+    - 할인카드 할인
   - futureDiscountAmount: 미래 할인 금액 (적립금, 캐시백 등 후속 혜택)
   - totalBenefitAmount: 총 혜택 금액 (즉시 할인 + 미래 할인)
   - finalAmount: 실제 결제 금액 (원래 금액 - 즉시 할인)
@@ -240,8 +247,41 @@ Next.js 애플리케이션의 루트 레이아웃을 정의하는 파일입니�
 - 환경변수 기반 동적 URL 설정:
   - `NEXT_PUBLIC_BASE_URL`: 배포 환경에 따른 기본 URL 설정
   - 개발 환경: http://localhost:3000
-  - 프로덕션 환경: https://discount-helper.pages.dev
+  - 프로덕션 환경: https://halindoumi.com
   - OpenGraph 이미지, canonical URL 등에 활용
 - Google Analytics 통합
 - 반응형 레이아웃 구조
 - 다국어 지원 (한국어)
+
+#### `app/sitemap.ts`
+
+사이트맵을 자동으로 생성하는 파일입니다.
+
+주요 기능:
+
+- 정적 페이지(홈, 할인 팁, 문의 페이지)와 동적 페이지(매장별 페이지) 자동 포함
+- 상대적 중요도(priority)와 갱신 주기(changeFrequency) 설정
+- 환경 변수를 통한 URL 동적 처리
+- 매장 데이터를 기반으로 동적 URL 자동 생성
+
+#### `app/robots.ts`
+
+검색 엔진 크롤러를 위한 규칙을 설정하는 파일입니다.
+
+주요 기능:
+
+- 모든 크롤러에 대한 접근 권한 설정
+- API 엔드포인트 접근 제한
+- 사이트맵 위치 안내
+
+#### `docs/SEO_GUIDE.md`
+
+SEO 최적화 및 구글 서치콘솔 제출 방법에 대한 가이드 문서입니다.
+
+주요 내용:
+
+- sitemap.xml 및 robots.txt 설정 방법
+- 구글 서치콘솔 사이트 등록 및 제출 방법
+- 소유권 확인 방법
+- 도메인 변경 후 조치사항
+- SEO 추가 최적화 팁

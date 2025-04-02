@@ -29,4 +29,11 @@ export const STORES: IStore[] = [
     thumbnail: "/images/stores/emart24.png",
     isFavorite: false,
   },
+  {
+    id: "5",
+    name: "메가커피",
+    category: StoreCategory.CAFE,
+    thumbnail: "/images/stores/mega.png",
+    isFavorite: false,
+  },
 ];

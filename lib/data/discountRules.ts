@@ -59,6 +59,13 @@ export interface IDiscountRule {
     cashbackAmount: number; // 캐시백 금액
   };
 
+  // 카카오페이 굿딜
+  kakaoPay?: {
+    enabled: boolean;
+    discountRate: number; // 할인율 (3% = 0.03)
+    restrictions?: string[];
+  };
+
   // 기타 매장별 특별 할인
   specialDiscounts?: Array<{
     name: string;
@@ -105,6 +112,11 @@ export const DISCOUNT_RULES: IDiscountRule[] = [
       enabled: true,
       minAmount: 2000,
       cashbackAmount: 500,
+    },
+    kakaoPay: {
+      enabled: true,
+      discountRate: 0.03, // 3% 할인
+      restrictions: ["카카오페이 굿딜로 결제 시 적용"],
     },
   },
   {
@@ -207,6 +219,47 @@ export const DISCOUNT_RULES: IDiscountRule[] = [
       enabled: true,
       minAmount: 2000,
       cashbackAmount: 500,
+    },
+    kakaoPay: {
+      enabled: true,
+      discountRate: 0.03, // 3% 할인
+      restrictions: ["카카오페이 굿딜로 결제 시 적용"],
+    },
+  },
+  {
+    storeId: "5", // 메가커피
+    carrierMembership: {
+      skt: {
+        enabled: true,
+        discountRate: 0.2, // 20% 할인
+        restrictions: ["1일 1회"],
+        excludedProducts: ["행사 메뉴"],
+      },
+      kt: {
+        enabled: false,
+        discountRate: 0,
+      },
+      lg: {
+        enabled: false,
+        discountRate: 0,
+      },
+    },
+    naverMembership: {
+      enabled: false,
+      instantDiscountRate: 0,
+      pointRate: 0,
+      maxPointAmount: 0,
+      productRestriction: "all",
+    },
+    naverPayWeekend: {
+      enabled: false,
+      minAmount: 0,
+      cashbackAmount: 0,
+    },
+    kakaoPay: {
+      enabled: true,
+      discountRate: 0.05, // 5% 할인
+      restrictions: ["카카오페이 굿딜로 결제 시 적용"],
     },
   },
 ];
