@@ -59,6 +59,14 @@ export interface IDiscountRule {
     cashbackAmount: number; // 캐시백 금액
   };
 
+  // 카카오페이 할인
+  kakaoPayDiscount: {
+    enabled: boolean;
+    discountRate: number; // 할인율 (3% = 0.03)
+    maxDiscountAmount?: number; // 최대 할인 금액
+    restrictions?: string[];
+  };
+
   // 기타 매장별 특별 할인
   specialDiscounts?: Array<{
     name: string;
@@ -106,6 +114,11 @@ export const DISCOUNT_RULES: IDiscountRule[] = [
       minAmount: 2000,
       cashbackAmount: 500,
     },
+    kakaoPayDiscount: {
+      enabled: true,
+      discountRate: 0.03, // 3% 할인
+      restrictions: ["카카오페이 *굿딜* 결제 시 적용"],
+    },
   },
   {
     storeId: "2", // CU
@@ -145,6 +158,11 @@ export const DISCOUNT_RULES: IDiscountRule[] = [
       minAmount: 2000,
       cashbackAmount: 500,
     },
+    kakaoPayDiscount: {
+      enabled: false,
+      discountRate: 0,
+      restrictions: [],
+    },
   },
   {
     storeId: "3", // 세븐일레븐
@@ -177,9 +195,14 @@ export const DISCOUNT_RULES: IDiscountRule[] = [
       minAmount: 2000,
       cashbackAmount: 500,
     },
+    kakaoPayDiscount: {
+      enabled: false,
+      discountRate: 0,
+      restrictions: [],
+    },
   },
   {
-    storeId: "4",
+    storeId: "4", // 이마트24
     carrierMembership: {
       skt: {
         enabled: false,
@@ -207,6 +230,11 @@ export const DISCOUNT_RULES: IDiscountRule[] = [
       enabled: true,
       minAmount: 2000,
       cashbackAmount: 500,
+    },
+    kakaoPayDiscount: {
+      enabled: true,
+      discountRate: 0.03, // 3% 할인
+      restrictions: ["카카오페이 *굿딜* 결제 시 적용"],
     },
   },
 ];
