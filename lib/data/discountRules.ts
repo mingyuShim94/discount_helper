@@ -113,6 +113,11 @@ export const DISCOUNT_RULES: IDiscountRule[] = [
       minAmount: 2000,
       cashbackAmount: 500,
     },
+    kakaoPay: {
+      enabled: true,
+      discountRate: 0.03, // 3% 할인
+      restrictions: ["카카오페이 굿딜로 결제 시 적용"],
+    },
   },
   {
     storeId: "2", // CU
@@ -152,11 +157,6 @@ export const DISCOUNT_RULES: IDiscountRule[] = [
       minAmount: 2000,
       cashbackAmount: 500,
     },
-    kakaoPayDiscount: {
-      enabled: false,
-      discountRate: 0,
-      restrictions: [],
-    },
   },
   {
     storeId: "3", // 세븐일레븐
@@ -189,14 +189,14 @@ export const DISCOUNT_RULES: IDiscountRule[] = [
       minAmount: 2000,
       cashbackAmount: 500,
     },
-    kakaoPayDiscount: {
-      enabled: false,
-      discountRate: 0,
-      restrictions: [],
+    kakaoPay: {
+      enabled: true,
+      discountRate: 0.03, // 3% 할인
+      restrictions: ["카카오페이 굿딜로 결제 시 적용"],
     },
   },
   {
-    storeId: "4", // 이마트24
+    storeId: "4",
     carrierMembership: {
       skt: {
         enabled: false,
@@ -224,6 +224,47 @@ export const DISCOUNT_RULES: IDiscountRule[] = [
       enabled: true,
       minAmount: 2000,
       cashbackAmount: 500,
+    },
+    kakaoPay: {
+      enabled: true,
+      discountRate: 0.03, // 3% 할인
+      restrictions: ["카카오페이 굿딜로 결제 시 적용"],
+    },
+  },
+  {
+    storeId: "5", // 메가커피
+    carrierMembership: {
+      skt: {
+        enabled: true,
+        discountRate: 0.2, // 20% 할인
+        restrictions: ["1일 1회"],
+        excludedProducts: ["행사 메뉴"],
+      },
+      kt: {
+        enabled: false,
+        discountRate: 0,
+      },
+      lg: {
+        enabled: false,
+        discountRate: 0,
+      },
+    },
+    naverMembership: {
+      enabled: false,
+      instantDiscountRate: 0,
+      pointRate: 0,
+      maxPointAmount: 0,
+      productRestriction: "all",
+    },
+    naverPayWeekend: {
+      enabled: false,
+      minAmount: 0,
+      cashbackAmount: 0,
+    },
+    kakaoPay: {
+      enabled: true,
+      discountRate: 0.05, // 5% 할인
+      restrictions: ["카카오페이 굿딜로 결제 시 적용"],
     },
   },
 ];
