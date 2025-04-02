@@ -7,6 +7,7 @@ import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { debounce } from "lodash";
+import { AdSense } from "@/components/ads/AdSense";
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -28,6 +29,15 @@ export default function HomePage() {
         </div>
       </div>
 
+      <div className="mb-8">
+        <AdSense
+          slot="1234567890"
+          style={{ display: "block", textAlign: "center" }}
+          format="auto"
+          responsive={true}
+        />
+      </div>
+
       <Tabs defaultValue="all">
         <TabsList>
           <TabsTrigger value="all">전체</TabsTrigger>
@@ -40,6 +50,15 @@ export default function HomePage() {
 
         <TabsContent value="all">
           <StoreGrid query={searchQuery} />
+
+          <div className="mt-8">
+            <AdSense
+              slot="9876543210"
+              style={{ display: "block", textAlign: "center" }}
+              format="auto"
+              responsive={true}
+            />
+          </div>
         </TabsContent>
 
         {Object.values(StoreCategory).map((category) => (
