@@ -21,7 +21,7 @@ interface IAdSenseProps {
 }
 
 export const AdSense: React.FC<IAdSenseProps> = ({
-  client = "ca-pub-5294358720517664",
+  client = "ca-pub-8647279125417942",
   slot,
   format = "auto",
   responsive = true,

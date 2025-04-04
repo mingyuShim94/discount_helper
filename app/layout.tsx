@@ -129,7 +129,7 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <head>
-        <meta name="google-adsense-account" content="ca-pub-5294358720517664" />
+        <meta name="google-adsense-account" content="ca-pub-8647279125417942" />
         <Suspense fallback={null}>
           <GoogleAnalytics />
         </Suspense>
@@ -139,7 +139,7 @@ export default function RootLayout({
       >
         <Script
           async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5294358720517664"
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8647279125417942"
           crossOrigin="anonymous"
           strategy="afterInteractive"
         />
