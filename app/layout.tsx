@@ -142,6 +142,7 @@ export default function RootLayout({
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8647279125417942"
           crossOrigin="anonymous"
           strategy="afterInteractive"
+          id="adsbygoogle-script"
         />
         <Header />
         <main className="min-h-[calc(100vh-57px)]">{children}</main>

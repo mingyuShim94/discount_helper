@@ -5,12 +5,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StoreCategory } from "@/types/store";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { debounce } from "lodash";
 import { AdSense } from "@/components/ads/AdSense";
+import { usePathname } from "next/navigation";
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [adKey, setAdKey] = useState(0);
+  const pathname = usePathname();
+
+  // 페이지 이동 시 AdSense 컴포넌트 재렌더링을 위한 키 업데이트
+  useEffect(() => {
+    setAdKey((prev) => prev + 1);
+  }, [pathname]);
 
   const handleSearch = debounce((value: string) => {
     setSearchQuery(value);
@@ -29,15 +37,6 @@ export default function HomePage() {
         </div>
       </div>
 
-      <div className="mb-8">
-        <AdSense
-          slot="1234567890"
-          style={{ display: "block", textAlign: "center" }}
-          format="auto"
-          responsive={true}
-        />
-      </div>
-
       <Tabs defaultValue="all">
         <TabsList>
           <TabsTrigger value="all">전체</TabsTrigger>
@@ -50,15 +49,6 @@ export default function HomePage() {
 
         <TabsContent value="all">
           <StoreGrid query={searchQuery} />
-
-          <div className="mt-8">
-            <AdSense
-              slot="9876543210"
-              style={{ display: "block", textAlign: "center" }}
-              format="auto"
-              responsive={true}
-            />
-          </div>
         </TabsContent>
 
         {Object.values(StoreCategory).map((category) => (
@@ -67,6 +57,27 @@ export default function HomePage() {
           </TabsContent>
         ))}
       </Tabs>
+
+      {/* 인라인 배너 광고 - 콘텐츠 하단 */}
+      <div
+        className="w-full bg-white mt-8 border-t pt-4"
+        key={`ad-banner-${adKey}`}
+      >
+        <AdSense
+          slot="1234567890"
+          style={{
+            display: "block",
+            textAlign: "center",
+            margin: "0 auto",
+            minHeight: "60px",
+            maxHeight: "90px",
+            overflow: "hidden",
+          }}
+          format="auto"
+          responsive={true}
+          minHeight="60px"
+        />
+      </div>
     </main>
   );
 }

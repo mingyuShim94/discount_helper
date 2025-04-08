@@ -1,6 +1,7 @@
 export interface IDiscountInfo {
   id: string;
   type: DiscountType;
+  benefitType: BenefitType;
   title: string;
   description: string;
   conditions: string;
@@ -27,8 +28,24 @@ export enum DiscountType {
   PAYMENT = "결제수단",
 }
 
+export enum BenefitType {
+  INSTANT_DISCOUNT = "즉시할인",
+  POINT = "적립",
+  CASHBACK = "캐시백",
+}
+
 export interface IStoreDiscount {
   storeId: string;
   storeName: string;
   discounts: IDiscountInfo[];
+}
+
+export interface IDiscountCalculation {
+  originalAmount: number;
+  instantDiscount: number;
+  pointAmount: number;
+  cashbackAmount: number;
+  totalBenefit: number;
+  finalAmount: number;
+  perceivedAmount: number;
 }

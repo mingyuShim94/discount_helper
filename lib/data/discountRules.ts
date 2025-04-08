@@ -157,6 +157,11 @@ export const DISCOUNT_RULES: IDiscountRule[] = [
       minAmount: 2000,
       cashbackAmount: 500,
     },
+    kakaoPay: {
+      enabled: false, // 카카오페이 굿딜 비활성화
+      discountRate: 0,
+      restrictions: [],
+    },
   },
   {
     storeId: "3", // 세븐일레븐
@@ -190,9 +195,9 @@ export const DISCOUNT_RULES: IDiscountRule[] = [
       cashbackAmount: 500,
     },
     kakaoPay: {
-      enabled: true,
-      discountRate: 0.03, // 3% 할인
-      restrictions: ["카카오페이 굿딜로 결제 시 적용"],
+      enabled: false, // 카카오페이 굿딜 비활성화
+      discountRate: 0,
+      restrictions: [],
     },
   },
   {

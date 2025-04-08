@@ -1,4 +1,4 @@
-import { IDiscountInfo, DiscountType } from "@/types/discount";
+import { IDiscountInfo, DiscountType, BenefitType } from "@/types/discount";
 import {
   calculateCombinedDiscount,
   calculateDiscount,
@@ -46,6 +46,7 @@ export const createCombinedDiscount = (
   const combinedDiscount: IDiscountInfo = {
     id: combinedId,
     type: DiscountType.CARD, // 중복 할인도 카드 타입으로 설정
+    benefitType: BenefitType.INSTANT_DISCOUNT, // 카드 할인은 즉시할인으로 분류
     title: `${membershipDiscount.title} + ${cardDiscount.title} 중복 할인`,
     description: `${
       membershipDiscount.title
