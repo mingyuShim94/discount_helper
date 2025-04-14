@@ -21,7 +21,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { IDiscountFilter } from "@/types/discountFilter";
-import { calculateOptimalDiscounts } from "@/utils/discountCalculator";
+import {
+  calculateOptimalDiscounts,
+  IDiscountCalculationResult,
+} from "@/utils/discountCalculator";
 import {
   Tooltip,
   TooltipContent,
@@ -61,67 +64,6 @@ function isWeekend(): boolean {
   const day = now.getDay(); // 0: 일요일, 1: 월요일, ..., 6: 토요일
   return day === 0 || day === 5 || day === 6;
 }
-
-/**
- * 할인 계산 결과 인터페이스
- */
-// interface IDiscountCalculationResult {
-//   method: string;
-//   originalAmount: number;
-//   instantDiscountAmount: number;
-//   pointAmount: number;
-//   cashbackAmount: number;
-//   totalBenefitAmount: number;
-//   finalAmount: number;
-//   perceivedAmount: number;
-//   discountRate: number;
-//   rank: number;
-//   note?: string;
-//   description?: string;
-// }
-
-/**
- * 멤버십 적용 후 남은 금액에 대한 카드 할인 금액을 계산하는 함수
- *
- * @param discount 할인 결과 객체
- * @returns 계산된 카드 할인 금액
- */
-// function calculateCardDiscountOnRemainingAmount(
-//   discount: IDiscountCalculationResult
-// ): number {
-//   // 통신사 멤버십 + 할인카드 조합인 경우
-//   if (
-//     discount.method.includes("멤버십") &&
-//     discount.method.includes("할인카드")
-//   ) {
-//     // 원래 금액에서 통신사 멤버십 할인 금액을 계산
-//     // 통신사 멤버십 할인은 1,000원당 100원 할인 (10%)
-//     const membershipDiscountAmount =
-//       Math.floor(discount.originalAmount / 1000) * 100;
-
-//     // 멤버십 적용 후 남은 금액
-//     const remainingAfterMembership =
-//       discount.originalAmount - membershipDiscountAmount;
-
-//     // 남은 금액에 카드 할인율 적용
-//     const cardDiscountRate =
-//       parseFloat(discount.method.match(/\d+/)?.[0] || "0") / 100;
-//     const cardDiscountAmount = Math.floor(
-//       remainingAfterMembership * cardDiscountRate
-//     );
-
-//     return cardDiscountAmount;
-//   }
-
-//   // 일반 할인카드만 사용하는 경우 (멤버십과 조합이 아닌 경우)
-//   if (discount.method.includes("할인카드")) {
-//     const cardDiscountRate =
-//       parseFloat(discount.method.match(/\d+/)?.[0] || "0") / 100;
-//     return Math.floor(discount.originalAmount * cardDiscountRate);
-//   }
-
-//   return 0;
-// }
 
 /**
  * DiscountResult 컴포넌트의 Props 인터페이스
@@ -312,10 +254,13 @@ export function DiscountResult({
    * UI 상태 관리
    * expandedCards: 각 할인 방법 카드의 확장/축소 상태를 저장하는 객체
    * isMobile: 현재 화면이 모바일 크기인지 여부
+   * selectedDiscount: 사용자가 선택한 할인 방법 (테이블 행 클릭)
    */
   const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>(
     {}
   );
+  const [selectedDiscount, setSelectedDiscount] =
+    useState<IDiscountCalculationResult | null>(null);
   const isMobile = useMediaQuery("(max-width: 768px)");
   // #endregion
 
@@ -361,6 +306,16 @@ export function DiscountResult({
       ...prev,
       [method]: !prev[method],
     }));
+  };
+
+  /**
+   * 할인 방법 선택 핸들러
+   * 테이블 행 클릭 시 해당 할인 방법을 선택 상태로 설정합니다.
+   *
+   * @param discount 선택된 할인 방법
+   */
+  const handleSelectDiscount = (discount: IDiscountCalculationResult) => {
+    setSelectedDiscount(discount);
   };
   // #endregion
 
@@ -701,201 +656,201 @@ export function DiscountResult({
                 </Tabs>
               ) : (
                 <>
-                  {/* 최적 할인 방법 영수증 UI */}
-                  {bestDiscount && (
-                    <DiscountReceipt
-                      discount={bestDiscount}
-                      isBest={true}
-                      storeId={storeId}
-                    />
-                  )}
+                  {/* 데스크톱 UI: 할인 영수증과 할인 테이블을 나란히 배치 */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    {/* 좌측: 할인 영수증 */}
+                    <div className="lg:sticky lg:top-4 lg:self-start">
+                      <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-medium">
+                          {selectedDiscount
+                            ? "선택된 할인 방법"
+                            : "최적 할인 방법"}
+                        </h3>
+                        {selectedDiscount && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setSelectedDiscount(null)}
+                          >
+                            최적 할인으로 돌아가기
+                          </Button>
+                        )}
+                      </div>
 
-                  {/* 전체 할인 방법 테이블 */}
-                  <div className="rounded-md border">
-                    <Table>
-                      {/* 테이블 헤더 */}
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="text-right bg-purple-50 w-[120px]">
-                            총 혜택
-                          </TableHead>
-                          <TableHead className="text-right bg-red-50 w-[120px]">
-                            체감가
-                          </TableHead>
-                          <TableHead>할인 방법</TableHead>
-                          <TableHead className="text-right">혜택율</TableHead>
-                          <TableHead className="text-right bg-green-50 w-[120px]">
-                            <div className="flex justify-end items-center space-x-1">
-                              <span>즉시할인</span>
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <HelpCircle className="h-3 w-3 text-muted-foreground" />
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p className="max-w-[200px] text-center">
-                                      결제 시점에 바로 할인되는 금액입니다.
-                                    </p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </div>
-                          </TableHead>
-                          <TableHead className="text-right bg-blue-50 w-[120px]">
-                            <div className="flex justify-end items-center space-x-1">
-                              <span>적립</span>
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <HelpCircle className="h-3 w-3 text-muted-foreground" />
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p className="max-w-[200px] text-center">
-                                      실제 결제 시점에는 할인되지 않고 나중에
-                                      받게 되는 포인트 적립 혜택입니다.
-                                    </p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </div>
-                          </TableHead>
-                          <TableHead className="text-right bg-yellow-50 w-[120px]">
-                            <div className="flex justify-end items-center space-x-1">
-                              <span>캐시백</span>
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <HelpCircle className="h-3 w-3 text-muted-foreground" />
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p className="max-w-[200px] text-center">
-                                      실제 결제 시점에는 할인되지 않고 나중에
-                                      받게 되는 현금성 혜택입니다.
-                                    </p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </div>
-                          </TableHead>
-                          <TableHead className="text-right w-[120px]">
-                            할인 전
-                          </TableHead>
-                          <TableHead className="text-right w-[120px]">
-                            결제 금액
-                          </TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {/* 할인 방법 목록 행 */}
-                        {discountResults
-                          .sort(
-                            (a, b) =>
-                              b.totalBenefitAmount - a.totalBenefitAmount
-                          )
-                          .map((discount) => (
-                            <TableRow
-                              key={discount.method}
-                              className={
-                                bestDiscount &&
-                                discount.method === bestDiscount.method
-                                  ? "bg-primary/5 border-l-4 border-l-primary"
-                                  : ""
-                              }
-                            >
-                              <TableCell className="text-right font-bold text-purple-700 bg-purple-50">
-                                <div className="text-lg">
-                                  {discount.totalBenefitAmount.toLocaleString()}
-                                  원
-                                </div>
-                                <div className="text-xs text-gray-600 font-normal">
-                                  전체 혜택
-                                </div>
-                              </TableCell>
-                              <TableCell className="text-right font-bold text-red-500 bg-red-50">
-                                {discount.perceivedAmount.toLocaleString()}원
-                                <div className="text-xs text-gray-500 font-normal">
-                                  체감 금액
-                                </div>
-                              </TableCell>
-                              <TableCell className="font-medium">
-                                <div className="space-y-2">
-                                  {bestDiscount &&
-                                    discount.method === bestDiscount.method && (
-                                      <div className="flex items-center mb-1 text-primary">
-                                        <Crown className="h-4 w-4 mr-1" />
-                                        <span className="text-xs font-medium">
-                                          최적 할인
-                                        </span>
-                                      </div>
+                      {/* 영수증 */}
+                      {selectedDiscount ? (
+                        <DiscountReceipt
+                          discount={selectedDiscount}
+                          isBest={
+                            selectedDiscount.method === bestDiscount?.method
+                          }
+                          storeId={storeId}
+                        />
+                      ) : (
+                        bestDiscount && (
+                          <DiscountReceipt
+                            discount={bestDiscount}
+                            isBest={true}
+                            storeId={storeId}
+                          />
+                        )
+                      )}
+                    </div>
+
+                    {/* 우측: 할인 테이블 */}
+                    <div className="rounded-md border">
+                      <div className="p-3 bg-gray-50 border-b">
+                        <h3 className="font-medium">할인 방법 비교</h3>
+                        <p className="text-xs text-gray-500">
+                          원하는 할인 방법을 클릭하여 상세 정보를 확인하세요
+                        </p>
+                      </div>
+                      <Table>
+                        {/* 테이블 헤더 */}
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="text-right bg-purple-50 w-[100px]">
+                              총 혜택
+                            </TableHead>
+                            <TableHead className="text-right bg-red-50 w-[100px]">
+                              체감가
+                            </TableHead>
+                            <TableHead>할인 방법</TableHead>
+                            <TableHead className="text-right">혜택율</TableHead>
+                            <TableHead className="text-right bg-green-50 w-[100px]">
+                              즉시할인
+                            </TableHead>
+                            <TableHead className="text-right bg-blue-50 w-[100px]">
+                              적립
+                            </TableHead>
+                            <TableHead className="text-right bg-yellow-50 w-[100px]">
+                              캐시백
+                            </TableHead>
+                            <TableHead className="text-right w-[100px]">
+                              결제 금액
+                            </TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {/* 할인 방법 목록 행 */}
+                          {discountResults
+                            .sort(
+                              (a, b) =>
+                                b.totalBenefitAmount - a.totalBenefitAmount
+                            )
+                            .map((discount) => (
+                              <TableRow
+                                key={discount.method}
+                                className={`
+                                  ${
+                                    bestDiscount &&
+                                    discount.method === bestDiscount.method
+                                      ? "bg-primary/5 border-l-4 border-l-primary"
+                                      : ""
+                                  }
+                                  ${
+                                    selectedDiscount &&
+                                    discount.method === selectedDiscount.method
+                                      ? "bg-blue-50 hover:bg-blue-100"
+                                      : "hover:bg-gray-50"
+                                  }
+                                  cursor-pointer
+                                `}
+                                onClick={() => handleSelectDiscount(discount)}
+                              >
+                                <TableCell className="text-right font-bold text-purple-700 bg-purple-50">
+                                  <div className="text-lg">
+                                    {discount.totalBenefitAmount.toLocaleString()}
+                                    원
+                                  </div>
+                                  <div className="text-xs text-gray-600 font-normal">
+                                    전체 혜택
+                                  </div>
+                                </TableCell>
+                                <TableCell className="text-right font-bold text-red-500 bg-red-50">
+                                  {discount.perceivedAmount.toLocaleString()}원
+                                  <div className="text-xs text-gray-500 font-normal">
+                                    체감 금액
+                                  </div>
+                                </TableCell>
+                                <TableCell className="font-medium">
+                                  <div className="space-y-2">
+                                    {bestDiscount &&
+                                      discount.method ===
+                                        bestDiscount.method && (
+                                        <div className="flex items-center mb-1 text-primary">
+                                          <Crown className="h-4 w-4 mr-1" />
+                                          <span className="text-xs font-medium">
+                                            최적 할인
+                                          </span>
+                                        </div>
+                                      )}
+                                    <span
+                                      className={
+                                        bestDiscount &&
+                                        discount.method === bestDiscount.method
+                                          ? "font-bold text-primary text-lg whitespace-normal block"
+                                          : "text-lg whitespace-normal block"
+                                      }
+                                    >
+                                      {discount.method}
+                                    </span>
+                                    {discount.note && (
+                                      <p className="text-xs text-gray-500 mt-1 break-words max-w-[200px] line-clamp-2 hover:line-clamp-none">
+                                        {discount.note}
+                                      </p>
                                     )}
-                                  <span
-                                    className={
-                                      bestDiscount &&
-                                      discount.method === bestDiscount.method
-                                        ? "font-bold text-primary text-lg whitespace-normal block"
-                                        : "text-lg whitespace-normal block"
-                                    }
-                                  >
-                                    {discount.method}
+                                  </div>
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                    {(discount.discountRate * 100).toFixed(1)}
                                   </span>
-                                  {discount.note && (
-                                    <p className="text-xs text-gray-500 mt-1 break-words max-w-[200px] line-clamp-2 hover:line-clamp-none">
-                                      {discount.note}
-                                    </p>
-                                  )}
-                                </div>
-                              </TableCell>
-                              <TableCell className="text-right">
-                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                                  {(discount.discountRate * 100).toFixed(1)}
-                                </span>
-                              </TableCell>
-                              <TableCell
-                                className={
-                                  discount.instantDiscountAmount > 0
-                                    ? "text-right text-green-600 font-bold bg-green-50"
-                                    : "text-right text-gray-500 bg-green-50"
-                                }
-                              >
-                                {discount.instantDiscountAmount > 0
-                                  ? `-${discount.instantDiscountAmount.toLocaleString()}원`
-                                  : "0원"}
-                              </TableCell>
-                              <TableCell
-                                className={
-                                  discount.pointAmount > 0
-                                    ? "text-right text-blue-600 font-bold bg-blue-50"
-                                    : "text-right text-gray-500 bg-blue-50"
-                                }
-                              >
-                                {discount.pointAmount > 0
-                                  ? `-${discount.pointAmount.toLocaleString()}원`
-                                  : "0원"}
-                              </TableCell>
-                              <TableCell
-                                className={
-                                  discount.cashbackAmount > 0
-                                    ? "text-right text-amber-600 font-bold bg-yellow-50"
-                                    : "text-right text-gray-500 bg-yellow-50"
-                                }
-                              >
-                                {discount.cashbackAmount > 0
-                                  ? `-${discount.cashbackAmount.toLocaleString()}원`
-                                  : "0원"}
-                              </TableCell>
-                              <TableCell className="text-right font-medium">
-                                {discount.originalAmount.toLocaleString()}원
-                              </TableCell>
-                              <TableCell className="text-right font-bold">
-                                {discount.finalAmount.toLocaleString()}원
-                                <div className="text-xs text-gray-500 font-normal">
-                                  실제 결제액
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                      </TableBody>
-                    </Table>
+                                </TableCell>
+                                <TableCell
+                                  className={
+                                    discount.instantDiscountAmount > 0
+                                      ? "text-right text-green-600 font-bold bg-green-50"
+                                      : "text-right text-gray-500 bg-green-50"
+                                  }
+                                >
+                                  {discount.instantDiscountAmount > 0
+                                    ? `-${discount.instantDiscountAmount.toLocaleString()}원`
+                                    : "0원"}
+                                </TableCell>
+                                <TableCell
+                                  className={
+                                    discount.pointAmount > 0
+                                      ? "text-right text-blue-600 font-bold bg-blue-50"
+                                      : "text-right text-gray-500 bg-blue-50"
+                                  }
+                                >
+                                  {discount.pointAmount > 0
+                                    ? `-${discount.pointAmount.toLocaleString()}원`
+                                    : "0원"}
+                                </TableCell>
+                                <TableCell
+                                  className={
+                                    discount.cashbackAmount > 0
+                                      ? "text-right text-amber-600 font-bold bg-yellow-50"
+                                      : "text-right text-gray-500 bg-yellow-50"
+                                  }
+                                >
+                                  {discount.cashbackAmount > 0
+                                    ? `-${discount.cashbackAmount.toLocaleString()}원`
+                                    : "0원"}
+                                </TableCell>
+                                <TableCell className="text-right font-bold">
+                                  {discount.finalAmount.toLocaleString()}원
+                                  <div className="text-xs text-gray-500 font-normal">
+                                    실제 결제액
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                        </TableBody>
+                      </Table>
+                    </div>
                   </div>
                 </>
               )}
