@@ -1,24 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 💰 할인도우미 (Discount Helper)
 
-## Getting Started
+> **편의점과 카페에서 최적의 할인 방법을 찾아주는 스마트 할인 계산기**
 
-First, run the development server:
+🔗 **서비스 URL**: [https://halindoumi.com](https://halindoumi.com)
+
+![Next.js](https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=next.js)
+![React](https://img.shields.io/badge/React-19-61dafb?style=flat-square&logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=flat-square&logo=typescript)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4-38bdf8?style=flat-square&logo=tailwindcss)
+
+## 🎯 프로젝트 소개
+
+할인도우미는 한국의 복잡한 편의점/카페 할인 혜택들을 **실시간으로 비교 분석**하여 사용자에게 **최적의 할인 조합**을 제안하는 웹 서비스입니다.
+
+### 📊 해결하는 문제
+- **복잡한 할인 정책**: 매장별로 다른 할인율, 시간 제한, 상품 제한
+- **할인 조합의 어려움**: 통신사 멤버십 + 간편결제 + 카드할인 등의 중복 적용 가능 여부
+- **최적화의 필요성**: 동일 금액에서 가장 유리한 결제 방법 선택
+
+### 🏪 지원 매장
+- **편의점**: GS25, CU, 세븐일레븐, 이마트24
+- **카페**: 메가커피, 컴포즈커피 등
+
+### 💳 지원 할인 수단
+- **통신사 멤버십**: SKT(T멤버십), KT, LG U+
+- **간편결제**: 네이버페이(주말 캐시백), 카카오페이 굿딜
+- **네이버 멤버십**: 즉시할인 + 포인트 적립
+- **신용카드**: 사용자 맞춤 할인율
+
+## 🚀 핵심 기능
+
+### 💡 스마트 할인 계산기
+- 금액 입력 시 즉시 최적 할인 방법 제안
+- 복합 할인 조합 계산 (멤버십 + 카드, 멤버십 + 간편결제)
+- 수식 입력 지원 (`1200+800` 같은 계산식 입력 가능)
+
+### 🎯 매장별 맞춤 계산
+- **GS25**: POP 로고 상품 여부에 따른 할인율 차등
+- **CU**: KT 멤버십 시간대 제한 및 간편식 제품 제한
+- **시간대별 할인**: 특정 시간대 한정 할인 자동 적용
+
+### 📱 반응형 UX
+- **모바일**: 탭 기반의 단계별 UI 흐름
+- **데스크톱**: 2단 그리드 레이아웃으로 정보 밀도 최적화
+- **직관적 시각화**: 영수증 형태의 할인 결과 표시
+
+## 🛠 개발 환경 설정
+
+### 로컬 실행
 
 ```bash
+# 의존성 설치
+npm install
+
+# 개발 서버 실행 (Turbopack 사용)
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# 브라우저에서 확인
+# http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 빌드 및 배포
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# 프로덕션 빌드
+npm run build
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# 프로덕션 서버 실행
+npm start
+
+# 코드 품질 검사
+npm run lint
+```
 
 ## SEO 최적화
 
